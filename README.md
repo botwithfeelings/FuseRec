@@ -1,1 +1,1 @@
-# Project Source and Proposal for CSC 791: Machine Learning for User Adaptive Systems
+# Project Source for CSC 791 (Spring 16): Machine Learning for User Adaptive Systems
