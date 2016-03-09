@@ -66,12 +66,21 @@ def load_vectors(weighted):
     return v
 
 
-def main():
+def do_user_cf():
     global vectors, vectors_weighted
     vectors, vectors_weighted = load_vectors(False), load_vectors(True)
-    for user in vectors_weighted.iterkeys():
-        print get_recommendations(user)
-        break
+    recommendations = dict()
+    recommendations.update((user, get_recommendations(user)) for user in vectors.iterkeys())
+
+    # Temporary view.
+    print recommendations
+
+    # TODO insert cross validation code here.
+    return
+
+
+def main():
+    do_user_cf()
     return
 
 
