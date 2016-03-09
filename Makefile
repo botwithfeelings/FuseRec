@@ -2,7 +2,7 @@
 # Tim Menzies, Dept. of CSC, NC State Univerisity. See
 # https://github.com/txt/se16/blob/master/Makefile for the original.
 
-typo: ready
+save: ready
 	@- git status
 	@- git commit -am "saving"
 	@- git push origin master
