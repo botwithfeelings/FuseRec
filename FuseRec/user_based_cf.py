@@ -1,7 +1,6 @@
 from __future__ import division
 from math import log, sqrt
 from pickle import load as pl
-from operator import itemgetter
 
 import config
 
@@ -34,10 +33,7 @@ def get_cosine_similarity(x, y):
 # For a given user u, get back a dictionary of cosine distances of each vector in set v.
 def get_cosine_similarity_for_user(user, vectors):
     sims = [(key, get_cosine_similarity(vectors[user], data)) for (key, data) in vectors.iteritems() if key != user]
-    return sorted(sims, key=lambda x: x[1])
-
-
-
+    return sorted(sims, key=lambda x: x[1], reverse=True)
 
 
 # Get a list of recommendations for a given user ID.
@@ -49,18 +45,18 @@ def get_recommendations(user, vectors):
     return
 
 
-def load_user_vectors():
-    with open(config.rec_data["vectors"], "rb") as fd:
+def load_vectors():
+    with open(config.rec_data["vectors_weighted"], "rb") as fd:
         vectors = pl(fd)
     return vectors
 
 
 def main():
-    v = load_user_vectors()
-    v = get_weighted_vectors(v)
-    for user in v.iterkeys():
-        get_recommendations(user, v)
-        break
+    v = load_vectors()
+    print v
+    # for user in v.iterkeys():
+    #     get_recommendations(user, v)
+    #     break
     return
 
 
