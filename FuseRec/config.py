@@ -7,10 +7,15 @@ fuse = dict(
 
 # File for dumping pickle data.
 rec_data = dict(
-    vectors="./Fuse_Data/user_vectors"
+    vectors="./Fuse_Data/user_vectors",
+    vectors_weighted="./Fuse_Data/user_vectors_weighted"
 )
+
+pickle_dump_weighted = True
 
 # Tuning params throughout the system.
 tuning_param = dict(
-    alpha=1
+    alpha=10,
+    expected_freq_weight=1,
+    num_sims=5
 )

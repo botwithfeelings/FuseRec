@@ -1,12 +1,13 @@
 from __future__ import division
-from math import log
+from math import log, sqrt
 from pickle import load as pl
+from operator import itemgetter
 
 import config
 
 
-# Get cosine distance between two vectors x and y.
-def get_cosine_dist(x, y):
+# Get cosine similarity between two vectors x and y.
+def get_cosine_similarity(x, y):
     # Swap positions so that we have to do less calculations.
     if len(y) < len(x):
         x, y = y, x
@@ -15,44 +16,37 @@ def get_cosine_dist(x, y):
     for key, x_val in x.iteritems():
         res += x_val * y.get(key, 0)
     if res == 0:
-        return 1
+        return 0
 
     # Get normalized vector values.
     norm_x = sum([v**2 for v in x.itervalues()])
     norm_y = sum([v**2 for v in y.itervalues()])
 
     try:
-        res = res / (norm_x * norm_y)
+        res /= sqrt(norm_x * norm_y)
     except ZeroDivisionError:
         # In case we were bad somewhere.
-        res = 1
+        res = 0
 
-    return 1 - res
+    return res
 
 
-# For a given user u, get back a dictionary of cosine distance of each vector in set v.
-def get_cosine_distance_for_user(u, v):
-    # TODO
+# For a given user u, get back a dictionary of cosine distances of each vector in set v.
+def get_cosine_similarity_for_user(user, vectors):
+    sims = [(key, get_cosine_similarity(vectors[user], data)) for (key, data) in vectors.iteritems() if key != user]
+    return sorted(sims, key=lambda x: x[1])
+
+
+
+
+
+# Get a list of recommendations for a given user ID.
+def get_recommendations(user, vectors):
+    sims = get_cosine_similarity_for_user(user, vectors)
+    print vectors[user]
+    print sims[0:config.tuning_param["num_sims"]]
+
     return
-
-
-# Natural log of total users / no. of users using function f in vector set v.
-def get_inverse_user_freq(f, v):
-    return log(len(v)/sum([f in data.keys() for data in v.itervalues()]))
-
-
-def get_weighted_vectors(vectors):
-    for (user, data) in vectors.iteritems():
-        # Iterate through and normalize the each user vector.
-        user_sum = sum([v for v in data.itervalues()])
-        data.update((k, v/user_sum) for (k, v) in data.iteritems())
-
-        # Now get the weighted vector values using inverse user frequency.
-        data.update((k, config.tuning_param["alpha"] * v * get_inverse_user_freq(k, vectors))
-                    for (k, v) in data.iteritems())
-
-        vectors[user] = data
-    return vectors
 
 
 def load_user_vectors():
@@ -64,7 +58,9 @@ def load_user_vectors():
 def main():
     v = load_user_vectors()
     v = get_weighted_vectors(v)
-    print v
+    for user in v.iterkeys():
+        get_recommendations(user, v)
+        break
     return
 
 

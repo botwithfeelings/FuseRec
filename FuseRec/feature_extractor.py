@@ -1,10 +1,30 @@
 from json import loads as jl
 from pickle import dump as pd
+from math import log
 
 import config
 
 # Container for user vectors
 user_vectors = dict()
+
+
+# Natural log of total users / no. of users using function f in vector set v.
+def get_inverse_user_freq(f, v):
+    return log(len(v)/sum([f in data.keys() for data in v.itervalues()]))
+
+
+def get_weighted_vectors(vectors):
+    for (user, data) in vectors.iteritems():
+        # Iterate through and normalize the each user vector.
+        user_sum = sum([v for v in data.itervalues()])
+        data.update((k, v/user_sum) for (k, v) in data.iteritems())
+
+        # Now get the weighted vector values using inverse user frequency.
+        data.update((k, config.tuning_param["alpha"] * v * get_inverse_user_freq(k, vectors))
+                    for (k, v) in data.iteritems())
+
+        vectors[user] = data
+    return vectors
 
 
 def update_vector(user_id, func_name, func_count):
@@ -59,8 +79,13 @@ def process_json_metadata():
                         update_vector(user_id, str(function_name), function_count)
 
     # Dump the data to a file.
-    with open(config.rec_data["vectors"], "ab+") as output:
+    with open(config.rec_data["vectors"], "w+") as output:
         pd(user_vectors, output)
+
+    # Dump the weighted vectors if flag is on.
+    if config.pickle_dump_weighted:
+        with open(config.rec_data["vectors_weighted"], "w+") as weighted_output:
+            pd(get_weighted_vectors(user_vectors), weighted_output)
 
     return
 
