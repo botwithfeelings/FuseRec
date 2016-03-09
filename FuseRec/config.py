@@ -9,3 +9,8 @@ fuse = dict(
 rec_data = dict(
     vectors="./Fuse_Data/user_vectors"
 )
+
+# Tuning params throughout the system.
+tuning_param = dict(
+    alpha=1
+)
