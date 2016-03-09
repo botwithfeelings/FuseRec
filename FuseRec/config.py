@@ -16,6 +16,6 @@ pickle_dump_weighted = True
 # Tuning params throughout the system.
 tuning_param = dict(
     alpha=10,
-    expected_freq_weight=1,
-    num_sims=5
+    expected_freq_weight=10,
+    num_sims=5,
 )

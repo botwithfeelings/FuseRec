@@ -1,8 +1,12 @@
 from __future__ import division
-from math import log, sqrt
+from math import sqrt
 from pickle import load as pl
 
 import config
+
+# The user vectors, weighted and non-weighted.
+vectors = dict()
+vectors_weighted = dict()
 
 
 # Get cosine similarity between two vectors x and y.
@@ -31,32 +35,43 @@ def get_cosine_similarity(x, y):
 
 
 # For a given user u, get back a dictionary of cosine distances of each vector in set v.
-def get_cosine_similarity_for_user(user, vectors):
-    sims = [(key, get_cosine_similarity(vectors[user], data)) for (key, data) in vectors.iteritems() if key != user]
+def get_cosine_similarity_for_user(user):
+    sims = [(key, get_cosine_similarity(vectors_weighted[user], data)) for (key, data) in vectors_weighted.iteritems()
+            if key != user]
     return sorted(sims, key=lambda x: x[1], reverse=True)
 
 
 # Get a list of recommendations for a given user ID.
-def get_recommendations(user, vectors):
-    sims = get_cosine_similarity_for_user(user, vectors)
-    print vectors[user]
-    print sims[0:config.tuning_param["num_sims"]]
+def get_recommendations(user):
+    sims = get_cosine_similarity_for_user(user)
 
-    return
+    recs = dict()
+    for t in sims[0:config.tuning_param["num_sims"]]:
+        # Add recommendations with expected frequency, basically the cumulative relative frequency of the similars.
+        # Recommendations are those functions that are in the similars but not in the input user vector functions.
+        sim_values = vectors[t[0]]
+        c_sum = sum(v for v in sim_values.itervalues())
+        recs.update((k, recs.get(k, 0) + config.tuning_param["expected_freq_weight"] * (v/c_sum))
+                    for (k, v) in sim_values.iteritems() if k not in vectors[user].keys())
+
+    return sorted(recs, key=recs.get, reverse=True)
 
 
-def load_vectors():
-    with open(config.rec_data["vectors_weighted"], "rb") as fd:
-        vectors = pl(fd)
-    return vectors
+def load_vectors(weighted):
+    vector_file = config.rec_data["vectors"]
+    if weighted:
+        vector_file = config.rec_data["vectors_weighted"]
+    with open(vector_file, "rb") as fd:
+        v = pl(fd)
+    return v
 
 
 def main():
-    v = load_vectors()
-    print v
-    # for user in v.iterkeys():
-    #     get_recommendations(user, v)
-    #     break
+    global vectors, vectors_weighted
+    vectors, vectors_weighted = load_vectors(False), load_vectors(True)
+    for user in vectors_weighted.iterkeys():
+        print get_recommendations(user)
+        break
     return
 
 
