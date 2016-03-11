@@ -110,7 +110,7 @@ def generate_similarity_matrix():
 
 
 def main():
-    #process_json_metadata()
+    process_json_metadata()
     generate_similarity_matrix()
     return 0
 

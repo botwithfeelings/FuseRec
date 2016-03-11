@@ -29,7 +29,7 @@ def get_recommendations(user):
 
 
 def do_item_cf():
-    # TODO temp code.
+    # TODO handle user input vector here.
     recommendations = {user: get_recommendations(user) for user in uv.iterkeys()}
 
     # Temporary view.
