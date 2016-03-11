@@ -17,8 +17,8 @@ def get_recommendations(user):
     # Get the list of functions used by the user
     user_funcs = list(uv[user].keys())
 
-    # Get similarity scores - mean of similarity values of functions used by the user, in the similarity vector for
-    # functions not used by the vector.
+    # Get similarity scores - mean of similarity values of functions used by the user,
+    # in the similarity vector for functions not used by the user.
     sim_scores = {f: get_average([v for (fo, v) in sm[f].iteritems() if fo in user_funcs])
                   for f in sm.iterkeys() if f not in user_funcs}
 
