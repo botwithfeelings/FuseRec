@@ -19,16 +19,23 @@ def get_cosine_similarity_for_user(user):
 def get_recommendations(user):
     sims = get_cosine_similarity_for_user(user)
 
-    recs = dict()
+    sims_exp_freq = dict()
     for t in sims[0:config.tuning_param["num_sims"]]:
         # Add recommendations with expected frequency, basically the cumulative relative frequency of the similars.
         # Recommendations are those functions that are in the similars but not in the input user vector functions.
         sim_values = vectors[t[0]]
         c_sum = sum(v for v in sim_values.itervalues())
-        recs.update((k, recs.get(k, 0) + config.tuning_param["expected_freq_weight"] * (v/c_sum))
-                    for (k, v) in sim_values.iteritems() if k not in vectors[user].keys())
+        sims_exp_freq.update((k, sims_exp_freq.get(k, 0) + config.tuning_param["expected_freq_weight"] * (v/c_sum))
+                             for (k, v) in sim_values.iteritems() if k not in vectors[user].keys())
 
-    return sorted(recs, key=recs.get, reverse=True)
+    # Sort based on the expected frequency.
+    recs = sorted(sims_exp_freq, key=sims_exp_freq.get, reverse=True)
+
+    # Limit to number of recommendations in config.
+    if len(recs) > config.tuning_param["num_recs"]:
+        recs = recs[0: config.tuning_param["num_recs"]]
+
+    return recs
 
 
 def do_user_cf():
