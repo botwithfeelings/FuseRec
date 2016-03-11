@@ -8,7 +8,8 @@ fuse = dict(
 # File for dumping pickle data.
 rec_data = dict(
     vectors="./Fuse_Data/user_vectors",
-    vectors_weighted="./Fuse_Data/user_vectors_weighted"
+    vectors_weighted="./Fuse_Data/user_vectors_weighted",
+    similarity_matrix="./Fuse_Data/similarity_matrix"
 )
 
 pickle_dump_weighted = True

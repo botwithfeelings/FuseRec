@@ -1,8 +1,9 @@
 from __future__ import division
 from json import loads as jl
-from pickle import dump as pd
+from pickle import dump, load
 from math import log
 
+import utility
 import config
 
 # Container for user vectors
@@ -40,11 +41,7 @@ def update_vector(user_id, func_name, func_count):
 
     # Update the vector.
     vector = user_vectors[user_id]
-    if func_name not in vector.keys():
-        vector[func_name] = func_count
-    else:
-        vector[func_name] += func_count
-
+    vector.update(func_name, (vector.get(func_name, 0) + func_count))
     user_vectors[user_id] = vector
     return
 
@@ -81,18 +78,40 @@ def process_json_metadata():
 
     # Dump the data to a file.
     with open(config.rec_data["vectors"], "w+") as output:
-        pd(user_vectors, output)
+        dump(user_vectors, output)
 
     # Dump the weighted vectors if flag is on.
     if config.pickle_dump_weighted:
         with open(config.rec_data["vectors_weighted"], "w+") as weighted_output:
-            pd(get_weighted_vectors(user_vectors), weighted_output)
+            dump(get_weighted_vectors(user_vectors), weighted_output)
+
+    return
+
+
+def generate_similarity_matrix():
+    vw = utility.load_vectors(True)
+
+    # Get set of all the functions used by the users.
+    funcs = set()
+    for user_data in vw.itervalues():
+        funcs.update(user_data.keys())
+
+    # Define function vectors where each vector contains all weighted values of users for this function.
+    fv = {f: {u: ud.get(f, 0) for (u, ud) in vw.iteritems()} for f in funcs}
+
+    # Define similarity matrix, every key value pair describes the cosine similarity between the functions.
+    sm = {f: {fo: utility.get_cosine_similarity(fv[f], fv[fo]) for fo in funcs if f != fo} for f in funcs}
+
+    # Dump the similarity matrix into file for later use in item-based CF.
+    with open(config.rec_data["similarity_matrix"], "w+") as sim_mat:
+        dump(sm, sim_mat)
 
     return
 
 
 def main():
-    process_json_metadata()
+    #process_json_metadata()
+    generate_similarity_matrix()
     return 0
 
 
