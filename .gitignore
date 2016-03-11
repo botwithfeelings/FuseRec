@@ -1,4 +1,7 @@
 *.aux
 *.log
 *.out
-Fuse_Data/fuse-bin
+*.pyc
+.idea/*
+FuseRec/.idea/*
+FuseRec/Fuse_Data/fuse-bin
