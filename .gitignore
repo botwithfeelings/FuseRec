@@ -5,3 +5,4 @@
 .idea/*
 FuseRec/.idea/*
 FuseRec/Fuse_Data/fuse-bin
+*.ipynb

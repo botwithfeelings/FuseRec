@@ -1,6 +1,6 @@
 from __future__ import division
 from json import loads as jl
-from pickle import dump, load
+from pickle import dump
 from math import log
 
 import utility
@@ -41,8 +41,28 @@ def update_vector(user_id, func_name, func_count):
 
     # Update the vector.
     vector = user_vectors[user_id]
-    vector.update(func_name, (vector.get(func_name, 0) + func_count))
+    vector[func_name] = vector.get(func_name, 0) + func_count
     user_vectors[user_id] = vector
+    return
+
+
+def generate_similarity_matrix(vw):
+
+    # Get set of all the functions used by the users.
+    funcs = set()
+    for user_data in vw.itervalues():
+        funcs.update(user_data.keys())
+
+    # Define function vectors where each vector contains all weighted values of users for this function.
+    fv = {f: {u: ud.get(f, 0) for (u, ud) in vw.iteritems()} for f in funcs}
+
+    # Define similarity matrix, every key value pair describes the cosine similarity between the functions.
+    sm = {f: {fo: utility.get_cosine_similarity(fv[f], fv[fo]) for fo in funcs if f != fo} for f in funcs}
+
+    # Dump the similarity matrix into file for later use in item-based CF.
+    with open(config.rec_data["similarity_matrix"], "w+") as sim_mat:
+        dump(sm, sim_mat)
+
     return
 
 
@@ -51,6 +71,10 @@ def process_json_metadata():
         # IMPORTANT: One json record per line, not an array of json objects.
         for line in fd:
             json_record = jl(line)
+
+            # Check if there was an issue with reading the metadata. If this is the case, skip this.
+            if json_record["POI"]["problemsWithMetadataAndMacros"] is None:
+                continue
 
             # Find the user identifier, using created by from POI data or the domain name from domain data
             created_by = ""
@@ -82,36 +106,18 @@ def process_json_metadata():
 
     # Dump the weighted vectors if flag is on.
     if config.pickle_dump_weighted:
+        vectors_weighted = get_weighted_vectors(user_vectors)
         with open(config.rec_data["vectors_weighted"], "w+") as weighted_output:
-            dump(get_weighted_vectors(user_vectors), weighted_output)
+            dump(vectors_weighted, weighted_output)
 
-    return
-
-
-def generate_similarity_matrix():
-    vw = utility.load_vectors(True)
-
-    # Get set of all the functions used by the users.
-    funcs = set()
-    for user_data in vw.itervalues():
-        funcs.update(user_data.keys())
-
-    # Define function vectors where each vector contains all weighted values of users for this function.
-    fv = {f: {u: ud.get(f, 0) for (u, ud) in vw.iteritems()} for f in funcs}
-
-    # Define similarity matrix, every key value pair describes the cosine similarity between the functions.
-    sm = {f: {fo: utility.get_cosine_similarity(fv[f], fv[fo]) for fo in funcs if f != fo} for f in funcs}
-
-    # Dump the similarity matrix into file for later use in item-based CF.
-    with open(config.rec_data["similarity_matrix"], "w+") as sim_mat:
-        dump(sm, sim_mat)
+        # Also generate the similarity matrix and dump it to file.
+        generate_similarity_matrix(vectors_weighted)
 
     return
 
 
 def main():
     process_json_metadata()
-    generate_similarity_matrix()
     return 0
 
 
