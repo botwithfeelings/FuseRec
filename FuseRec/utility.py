@@ -1,8 +1,15 @@
+from __future__ import division
+
 from math import sqrt
 from pickle import load
 from math import log
 
 import config
+
+
+# Simple average function.
+def average(l):
+    return sum(l)/len(l)
 
 
 # Natural log of total users / no. of users using function f in vector set v.

@@ -15,6 +15,9 @@ rec_data = dict(
 # Percent of total user vectors to be used for training.
 training_data_size = 0.7
 
+# No. of times the cross validation should be run.
+cv_runs = 5
+
 # Tuning params throughout the system.
 tuning_param = dict(
     alpha=10,

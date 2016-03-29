@@ -1,32 +1,36 @@
 from __future__ import division
+from random import choice
 
 import utility
 import config
 
-# The user vectors, weighted and non-weighted.
-vectors = dict()
-vectors_weighted = dict()
 
-
-# For a given user u, get back a dictionary of cosine distances of each vector in set v.
-def get_cosine_similarity_for_user(user):
-    sims = [(key, utility.get_cosine_similarity(vectors_weighted[user], data))
-            for (key, data) in vectors_weighted.iteritems() if key != user]
+# For a given user u, get back a list of tuples (user_id, cosine distances from given user).
+def get_cosine_similarity_for_user(vw, user):
+    sims = [(key, utility.get_cosine_similarity(vw[user], data))
+            for (key, data) in vw.iteritems() if key != user]
     return sorted(sims, key=lambda x: x[1], reverse=True)
 
 
 # Get a list of recommendations for a given user ID.
-def get_recommendations(user):
-    sims = get_cosine_similarity_for_user(user)
+def get_recommendations(data, user):
+    # Get the weighted vector for current data.
+    vw = utility.get_weighted_vectors(data)
+
+    # Get the sorted similarity values for the given user.
+    sims = get_cosine_similarity_for_user(vw, user)
 
     sims_exp_freq = dict()
-    for t in sims[0:config.tuning_param["num_sims"]]:
+
+    # Only look into the number of similars permitted.
+    for sim in sims[0:config.tuning_param["num_sims"]]:
         # Add recommendations with expected frequency, basically the cumulative relative frequency of the similars.
         # Recommendations are those functions that are in the similars but not in the input user vector functions.
-        sim_values = vectors[t[0]]
+        sim_user = sim[0]
+        sim_values = data[sim_user]
         c_sum = sum(v for v in sim_values.itervalues())
         sims_exp_freq.update((k, sims_exp_freq.get(k, 0) + config.tuning_param["expected_freq_weight"] * (v/c_sum))
-                             for (k, v) in sim_values.iteritems() if k not in vectors[user].keys())
+                             for (k, v) in sim_values.iteritems() if k not in data[user].keys())
 
     # Sort based on the expected frequency.
     recs = sorted(sims_exp_freq, key=sims_exp_freq.get, reverse=True)
@@ -38,15 +42,36 @@ def get_recommendations(user):
     return recs
 
 
+def do_cv(train, test):
+    # Do cross validation for each entry in the testing set.
+    success = 0
+    for (user, data) in test.iteritems():
+        # The function to be removed.
+        test_func = choice(data.keys())
+        data.pop(test_func)
+
+        # Add this modified vector to the training set.
+        train[user] = data
+
+        # Get the recommendation for the user in training data.
+        if test_func in get_recommendations(train, user):
+            success += 1
+
+        # Removed the test user from the training data for next iteration.
+        train.pop(user)
+
+    return success
+
+
 def do_user_cf():
-    global vectors, vectors_weighted
-    vectors, vectors_weighted = utility.load_vectors(False), utility.load_vectors(True)
-    recommendations = {user: get_recommendations(user) for user in vectors.iterkeys()}
+    train, test = utility.load_vectors()
 
-    # Temporary view.
-    print recommendations
+    # Get the success rate from the
+    success = [do_cv(train, test) for _ in range(config.cv_runs)]
 
-    # TODO insert cross validation code here.
+    # Print the average success rate
+    print utility.average(success)
+
     return
 
 
