@@ -33,14 +33,10 @@ def update_vector(user_id, func_name, func_count):
     if func_count == 0:
         return
 
-    # Find if there is one entry for the user ID.
-    if user_id not in user_vectors.keys():
-        # Create if the entry is not there.
-        user_vectors[user_id] = dict({func_name: func_count})
-        return
+    # Find the user_id and get the corresponding vector.
+    vector = user_vectors.get(user_id, dict())
 
     # Update the vector.
-    vector = user_vectors[user_id]
     vector[func_name] = vector.get(func_name, 0) + func_count
     user_vectors[user_id] = vector
     return
