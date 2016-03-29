@@ -29,6 +29,27 @@ def get_weighted_vectors(vectors):
     return vectors
 
 
+# Assumes a collection of weighted vectors.
+def generate_similarity_matrix(vw):
+    # Get set of all the functions used by the users.
+    funcs = set()
+    for user_data in vw.itervalues():
+        funcs.update(user_data.keys())
+
+    # Define function vectors where each vector contains all weighted values of users for this function.
+    fv = {f: {u: d.get(f, 0) for (u, d) in vw.iteritems()} for f in funcs}
+
+    # Define similarity matrix, every key value pair describes the cosine similarity between the functions.
+    sm = {f: {fo: utility.get_cosine_similarity(fv[f], fv[fo]) for fo in funcs if f != fo} for f in funcs}
+
+    # Dump the similarity matrix into file for later use in item-based CF.
+    with open(config.rec_data["similarity_matrix"], "w+") as sim_mat:
+        dump(sm, sim_mat)
+
+    return
+
+
+# Update the user vector with each function count.
 def update_vector(user_id, func_name, func_count):
     if func_count == 0:
         return
@@ -39,26 +60,6 @@ def update_vector(user_id, func_name, func_count):
     # Update the vector.
     vector[func_name] = vector.get(func_name, 0) + func_count
     user_vectors[user_id] = vector
-    return
-
-
-def generate_similarity_matrix(vw):
-
-    # Get set of all the functions used by the users.
-    funcs = set()
-    for user_data in vw.itervalues():
-        funcs.update(user_data.keys())
-
-    # Define function vectors where each vector contains all weighted values of users for this function.
-    fv = {f: {u: ud.get(f, 0) for (u, ud) in vw.iteritems()} for f in funcs}
-
-    # Define similarity matrix, every key value pair describes the cosine similarity between the functions.
-    sm = {f: {fo: utility.get_cosine_similarity(fv[f], fv[fo]) for fo in funcs if f != fo} for f in funcs}
-
-    # Dump the similarity matrix into file for later use in item-based CF.
-    with open(config.rec_data["similarity_matrix"], "w+") as sim_mat:
-        dump(sm, sim_mat)
-
     return
 
 
