@@ -2,6 +2,7 @@ from __future__ import division
 from json import loads as jl
 from pickle import dump
 from math import log
+from itertools import islice
 
 import utility
 import config
@@ -29,8 +30,11 @@ def get_weighted_vectors(vectors):
     return vectors
 
 
-# Assumes a collection of weighted vectors.
-def generate_similarity_matrix(vw):
+# Creates a similarity matrix from the given user data.
+def generate_similarity_matrix(uv):
+    # First retrieve the weighted vectors for the given data.
+    vw = get_weighted_vectors(uv)
+
     # Get set of all the functions used by the users.
     funcs = set()
     for user_data in vw.itervalues():
@@ -42,11 +46,7 @@ def generate_similarity_matrix(vw):
     # Define similarity matrix, every key value pair describes the cosine similarity between the functions.
     sm = {f: {fo: utility.get_cosine_similarity(fv[f], fv[fo]) for fo in funcs if f != fo} for f in funcs}
 
-    # Dump the similarity matrix into file for later use in item-based CF.
-    with open(config.rec_data["similarity_matrix"], "w+") as sim_mat:
-        dump(sm, sim_mat)
-
-    return
+    return sm
 
 
 # Update the user vector with each function count.
@@ -63,6 +63,7 @@ def update_vector(user_id, func_name, func_count):
     return
 
 
+# Workhorse function, performs the task of extracting feature vector and the similarity matrix from the json blob.
 def process_json_metadata():
     with open(config.fuse["json_file"], 'r') as fd:
         # IMPORTANT: One json record per line, not an array of json objects.
@@ -97,18 +98,25 @@ def process_json_metadata():
                     if function_count > 0:
                         update_vector(user_id, str(function_name), function_count)
 
+    # Split the vectors into training and testing sets.
+    train_size = config.training_data_size
+    user_iter = user_vectors.iteritems()
+
+    # Put the training data size amount in the training set, and the rest into testing.
+    training_data = dict(islice(user_iter, train_size))
+    testing_data = dict(user_iter)
+
     # Dump the data to a file.
-    with open(config.rec_data["vectors"], "w+") as output:
-        dump(user_vectors, output)
+    with open(config.rec_data["training"], "w+") as tr:
+        dump(training_data, tr)
 
-    # Dump the weighted vectors if flag is on.
-    if config.pickle_dump_weighted:
-        vectors_weighted = get_weighted_vectors(user_vectors)
-        with open(config.rec_data["vectors_weighted"], "w+") as weighted_output:
-            dump(vectors_weighted, weighted_output)
+    with open(config.rec_data["testing"], "w+") as ts:
+        dump(testing_data, ts)
 
-        # Also generate the similarity matrix and dump it to file.
-        generate_similarity_matrix(vectors_weighted)
+    # Generate the similarity matrix for the training data.
+    sm = generate_similarity_matrix(training_data)
+    with open(config.rec_data["similarity_matrix"], "w+") as sim:
+        dump(sm, sim)
 
     return
 

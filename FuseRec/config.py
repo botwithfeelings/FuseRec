@@ -7,12 +7,13 @@ fuse = dict(
 
 # File for dumping pickle data.
 rec_data = dict(
-    vectors="./Fuse_Data/user_vectors",
-    vectors_weighted="./Fuse_Data/user_vectors_weighted",
-    similarity_matrix="./Fuse_Data/similarity_matrix"
+    training="./Fuse_Data/training.dat",
+    testing="./Fuse_Data/testing.dat",
+    similarity_matrix="./Fuse_Data/similarity_matrix.dat"
 )
 
-pickle_dump_weighted = True
+# Percent of total user vectors to be used for training.
+training_data_size = 0.7
 
 # Tuning params throughout the system.
 tuning_param = dict(
