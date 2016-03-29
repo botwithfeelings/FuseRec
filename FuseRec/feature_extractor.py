@@ -1,7 +1,6 @@
 from __future__ import division
 from json import loads as jl
 from pickle import dump
-from math import log
 from itertools import islice
 
 import utility
@@ -9,44 +8,6 @@ import config
 
 # Container for user vectors
 user_vectors = dict()
-
-
-# Natural log of total users / no. of users using function f in vector set v.
-def get_inverse_user_freq(f, v):
-    return log(len(v)/sum([f in data.keys() for data in v.itervalues()]))
-
-
-def get_weighted_vectors(vectors):
-    for (user, data) in vectors.iteritems():
-        # Iterate through and normalize the each user vector.
-        user_sum = sum([v for v in data.itervalues()])
-        data.update((k, v/user_sum) for (k, v) in data.iteritems())
-
-        # Now get the weighted vector values using inverse user frequency.
-        data.update((k, config.tuning_param["alpha"] * v * get_inverse_user_freq(k, vectors))
-                    for (k, v) in data.iteritems())
-
-        vectors[user] = data
-    return vectors
-
-
-# Creates a similarity matrix from the given user data.
-def generate_similarity_matrix(uv):
-    # First retrieve the weighted vectors for the given data.
-    vw = get_weighted_vectors(uv)
-
-    # Get set of all the functions used by the users.
-    funcs = set()
-    for user_data in vw.itervalues():
-        funcs.update(user_data.keys())
-
-    # Define function vectors where each vector contains all weighted values of users for this function.
-    fv = {f: {u: d.get(f, 0) for (u, d) in vw.iteritems()} for f in funcs}
-
-    # Define similarity matrix, every key value pair describes the cosine similarity between the functions.
-    sm = {f: {fo: utility.get_cosine_similarity(fv[f], fv[fo]) for fo in funcs if f != fo} for f in funcs}
-
-    return sm
 
 
 # Update the user vector with each function count.
