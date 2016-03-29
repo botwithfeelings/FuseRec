@@ -32,7 +32,7 @@ def process_json_metadata():
             json_record = jl(line)
 
             # Check if there was an issue with reading the metadata. If this is the case, skip this.
-            if json_record["POI"]["problemsWithMetadataAndMacros"] is None:
+            if json_record["POI"]["problemsWithMetadataAndMacros"] is not None:
                 continue
 
             # Find the user identifier, using created by from POI data or the domain name from domain data
@@ -60,7 +60,7 @@ def process_json_metadata():
                         update_vector(user_id, str(function_name), function_count)
 
     # Split the vectors into training and testing sets.
-    train_size = config.training_data_size
+    train_size = int(config.training_data_size * len(user_vectors))
     user_iter = user_vectors.iteritems()
 
     # Put the training data size amount in the training set, and the rest into testing.
