@@ -19,7 +19,9 @@ def get_chunks(l, n):
         yield l[i:i+size]
 
 
-# Get training and testing data set from the given set.
+# Get training and testing data set from the given data,
+# where testing data contains the pairs in the chunk and
+# the rest pairs become training data.
 def get_data_split(data, chunk):
     if chunk >= config.num_slices:
         raise ValueError("Invalid slice number: " + str(chunk))

@@ -42,11 +42,24 @@ def get_recommendations(data, user):
     return recs
 
 
-def do_cv(train, test):
-    # Do cross validation for each entry in the testing set.
+def do_cv():
+    # Load the user vectors.
+    data = utility.load_vectors()
+
+    # Storage for the success rate.
+    rates = list()
+    for i in range(config.num_slices):
+        train, test = utility.get_data_split(data, i)
+        success = do_user_cf(train, test)
+        rates.append((success, len(test)))
+
+    return rates
+
+
+def do_user_cf(train, test):
     success = 0
     for (user, data) in test.iteritems():
-        # The function to be removed.
+        # The function to be removed at random.
         test_func = choice(data.keys())
         data.pop(test_func)
 
@@ -63,20 +76,8 @@ def do_cv(train, test):
     return success
 
 
-def do_user_cf():
-    train, test = utility.load_vectors()
-
-    # Get the success rate from the
-    success = [do_cv(train, test) for _ in range(config.cv_runs)]
-
-    # Print the average success rate
-    print utility.average(success)
-
-    return
-
-
 def main():
-    do_user_cf()
+    do_cv()
     return
 
 

@@ -5,7 +5,7 @@ import utility
 import config
 
 
-# Get recommendations from the similarity matrix given the user data.
+# Get recommendations from the similarity matrix given the single user's data.
 def get_recommendations(sm, data):
     # Get similarity scores - average of similarity values of functions used by the user,
     # in the similarity matrix for functions not used by the user.
@@ -21,9 +21,12 @@ def get_recommendations(sm, data):
     return recs
 
 
-def do_cv(sm, test):
-    # Do cross validation for each entry in the testing set.
+def do_item_cf(train, test):
     success = 0
+
+    # Generate the similarity matrix for the given data.
+    sm = utility.generate_similarity_matrix(train)
+
     for data in test.itervalues():
         # The function to be removed.
         test_func = choice(data.keys())
@@ -36,22 +39,21 @@ def do_cv(sm, test):
     return success
 
 
-def do_item_cf():
-    # Need only the testing data and the similarity matrix.
-    _, test = utility.load_vectors()
-    sm = utility.load_sim_matrix()
+def do_cv():
+    # Load the user vectors.
+    data = utility.load_vectors()
 
-    # Get the success rate from the
-    success = [do_cv(sm, test) for _ in range(config.cv_runs)]
+    rates = list()
+    for i in range(config.num_slices):
+        train, test = utility.get_data_split(data, i)
+        success = do_item_cf(train, test)
+        rates.append((success, len(test)))
 
-    # Print the average success rate
-    print utility.average(success)
-
-    return
+    return rates
 
 
 def main():
-    do_item_cf()
+    do_cv()
     return
 
 
