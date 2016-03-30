@@ -1,9 +1,7 @@
 from __future__ import division
 from json import loads as jl
 from pickle import dump
-from itertools import islice
 
-from utility import generate_similarity_matrix
 import config
 
 # Container for user vectors
