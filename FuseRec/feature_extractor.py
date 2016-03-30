@@ -26,7 +26,7 @@ def update_vector(user_id, func_name, func_count):
 
 # Workhorse function, performs the task of extracting feature vector and the similarity matrix from the json blob.
 def process_json_metadata():
-    with open(config.fuse["json_file"], 'r') as fd:
+    with open(config.json_data, 'r') as fd:
         # IMPORTANT: One json record per line, not an array of json objects.
         for line in fd:
             json_record = jl(line)
@@ -59,25 +59,9 @@ def process_json_metadata():
                     if function_count > 0:
                         update_vector(user_id, str(function_name), function_count)
 
-    # Split the vectors into training and testing sets.
-    train_size = int(config.training_data_size * len(user_vectors))
-    user_iter = user_vectors.iteritems()
-
-    # Put the training data size amount in the training set, and the rest into testing.
-    training_data = dict(islice(user_iter, train_size))
-    testing_data = dict(user_iter)
-
     # Dump the data to a file.
-    with open(config.rec_data["training"], "w+") as tr:
-        dump(training_data, tr)
-
-    with open(config.rec_data["testing"], "w+") as ts:
-        dump(testing_data, ts)
-
-    # Generate the similarity matrix for the training data.
-    sm = generate_similarity_matrix(training_data)
-    with open(config.rec_data["similarity_matrix"], "w+") as sim:
-        dump(sm, sim)
+    with open(config.user_data, "w+") as output:
+        dump(user_vectors, output)
 
     return
 
