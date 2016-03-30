@@ -1,6 +1,6 @@
 from __future__ import division
 
-from math import sqrt
+from math import sqrt, ceil
 from pickle import load
 from math import log
 
@@ -10,6 +10,27 @@ import config
 # Simple average function.
 def average(l):
     return sum(l)/len(l)
+
+
+# Yields n chunks from list l.
+def get_chunks(l, n):
+    size = int(ceil(len(l)/n))
+    for i in xrange(0, len(l), size):
+        yield l[i:i+size]
+
+
+# Get training and testing data set from the given set.
+def get_data_split(data, chunk):
+    if chunk >= config.num_slices:
+        raise ValueError("Invalid slice number: " + str(chunk))
+
+    chunks = get_chunks(data.keys(), config.num_slices)
+    assert len(chunks) == config.num_slices
+
+    train = {k: v for (k, v) in data.iteritems() if k not in chunks[chunk]}
+    test = {k: v for (k, v) in data.iteritems() if k in chunks[chunk]}
+
+    return train, test
 
 
 # Natural log of total users / no. of users using function f in vector set v.
@@ -51,21 +72,11 @@ def generate_similarity_matrix(uv):
     return sm
 
 
-# Typical loading functions
-def load_sim_matrix():
-    with open(config.rec_data["similarity_matrix"], "rb") as fd:
-        sm = load(fd)
-    return sm
-
-
 def load_vectors():
-    with open(config.rec_data["training"], "rb") as tr:
-        train = load(tr)
+    with open(config.user_data, "rb") as tr:
+        data = load(tr)
 
-    with open(config.rec_data["testing"], "rb") as ts:
-        test = load(ts)
-
-    return train, test
+    return data
 
 
 # Get cosine similarity between two vectors x and y.

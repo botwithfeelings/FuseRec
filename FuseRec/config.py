@@ -6,6 +6,9 @@ json_data="./Fuse_Data/fuse-bin"
 # File for dumping pickle data.
 user_data = "./Fuse_Data/data.dat"
 
+# No of slices for user data.
+num_slices = 14
+
 # Tuning params throughout the system.
 tuning_param = dict(
     alpha=10,
