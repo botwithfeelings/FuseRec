@@ -28,6 +28,7 @@ def do_item_cf(train, test):
     sm = utility.generate_similarity_matrix(train)
 
     for data in test.itervalues():
+        print(".")
         # The function to be removed.
         test_func = choice(data.keys())
         data.pop(test_func)
@@ -44,10 +45,11 @@ def do_cv():
     data = utility.load_vectors()
 
     rates = list()
-    for i in range(config.num_slices):
+    for i in xrange(config.num_slices):
         train, test = utility.get_data_split(data, i)
         success = do_item_cf(train, test)
-        rates.append((success, len(test)))
+        rates.append((success))
+        print("Run " + str(i) + " success rate " + str(float(success)/float(len(test))))
 
     return rates
 

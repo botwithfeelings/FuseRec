@@ -3,21 +3,24 @@ from __future__ import division
 from math import sqrt, ceil
 from pickle import load
 from math import log
-
 import config
 
 
 # Simple average function.
 def average(l):
+    if len(l) == 0:
+        return 0
     return sum(l)/len(l)
 
 
 # Yields n chunks from list l.
 def get_chunks(l, n):
     size = int(ceil(len(l)/n))
+    retList = list()
     for i in xrange(0, len(l), size):
-        yield l[i:i+size]
+        retList.append(l[i:i+size])
 
+    return retList
 
 # Get training and testing data set from the given data,
 # where testing data contains the pairs in the chunk and
@@ -27,7 +30,7 @@ def get_data_split(data, chunk):
         raise ValueError("Invalid slice number: " + str(chunk))
 
     chunks = get_chunks(data.keys(), config.num_slices)
-    assert len(chunks) == config.num_slices
+    # assert len(chunks) == config.num_slices
 
     train = {k: v for (k, v) in data.iteritems() if k not in chunks[chunk]}
     test = {k: v for (k, v) in data.iteritems() if k in chunks[chunk]}
