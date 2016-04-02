@@ -3,6 +3,7 @@ from random import choice
 
 import utility
 import config
+from state import *
 
 
 # Get recommendations from the similarity matrix given the single user's data.
@@ -28,7 +29,6 @@ def do_item_cf(train, test):
     sm = utility.generate_similarity_matrix(train)
 
     for data in test.itervalues():
-        print(".")
         # The function to be removed.
         test_func = choice(data.keys())
         data.pop(test_func)
@@ -43,19 +43,22 @@ def do_item_cf(train, test):
 def do_cv():
     # Load the user vectors.
     data = utility.load_vectors()
-
+    outfile_string = "item_slice" + str(config.num_slices) \
+     + "_rec" + str(config.tuning_param['num_recs']) + ".txt"
     rates = list()
-    for i in xrange(config.num_slices):
+    st = state('Item Based', rates, outfile_string, "INFO", config.num_slices, config.tuning_param['num_recs'])
+    for i in xrange(st.num_slices):
+        st.cur_slice += 1 
         train, test = utility.get_data_split(data, i)
         success = do_item_cf(train, test)
-        rates.append((success))
-        print("Run " + str(i) + " success rate " + str(float(success)/float(len(test))))
-
-    return rates
+        st.rates = (success,len(test))
+    return st
 
 
 def main():
-    do_cv()
+    final_state = do_cv()
+    print(final_state)
+    final_state.term()
     return
 
 
