@@ -7,12 +7,12 @@ json_data="./Fuse_Data/fuse-bin"
 user_data = "./Fuse_Data/data.dat"
 
 # No of slices for user data.
-num_slices = 2
+num_slices = 14
 
 # Tuning params throughout the system.
 tuning_param = dict(
     alpha=10,
     expected_freq_weight=10,
     num_sims=10,
-    num_recs=5
+    num_recs=10
 )
