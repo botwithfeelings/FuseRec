@@ -41,24 +41,13 @@ def get_recommendations(data, user):
 
     return recs
 
-
-def do_cv():
-    # Load the user vectors.
-    data = utility.load_vectors()
-
-    # Storage for the success rate.
-    rates = list()
-    for i in range(config.num_slices):
-        train, test = utility.get_data_split(data, i)
-        success = do_user_cf(train, test)
-        rates.append((success, len(test)))
-
-    return rates
-
-
 def do_user_cf(train, test):
     success = 0
+    print "test length ", len(test)
+    count = 0
     for (user, data) in test.iteritems():
+        print count
+        count += 1
         # The function to be removed at random.
         test_func = choice(data.keys())
         data.pop(test_func)
@@ -75,6 +64,19 @@ def do_user_cf(train, test):
 
     return success
 
+
+def do_cv():
+    # Load the user vectors.
+    data = utility.load_vectors()
+
+    # Storage for the success rate.
+    rates = list()
+    for i in range(2):
+        train, test = utility.get_data_split(data, i)
+        success = do_user_cf(train, test)
+        rates.append((success, len(test)))
+    print(rates)
+    return rates
 
 def main():
     do_cv()
