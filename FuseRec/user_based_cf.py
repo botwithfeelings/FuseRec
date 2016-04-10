@@ -44,10 +44,9 @@ def get_recommendations(data, user):
 
 def do_user_cf(train, test):
     success = 0
-    print "test length ", len(test)
     count = 0
     for (user, data) in test.iteritems():
-        print count
+        print "test user " + str(count) + " of " + str(len(test))
         count += 1
         # The function to be removed at random.
         test_func = choice(data.keys())
@@ -59,7 +58,7 @@ def do_user_cf(train, test):
         # Get the recommendation for the user in training data.
         if test_func in get_recommendations(train, user):
             success += 1
-
+            print "success"
         # Removed the test user from the training data for next iteration.
         train.pop(user)
 
@@ -69,14 +68,15 @@ def do_user_cf(train, test):
 def do_cv():
     # Load the user vectors.
     data = utility.load_vectors()
-    outfile_string = "user_slice" + str(config.num_slices) \
-     + "_rec" + str(config.tuning_param['num_recs']) + ".txt"
+    outfile_string = "user_slice" + str(config.num_slices) + "_rec" \
+        + str(config.tuning_param['num_recs']) + "_users" + str(config.tuning_param['num_sims']) + ".txt"
     rates = list()
     st = state('User Based', rates, outfile_string, "INFO", \
-        config.num_slices, config.tuning_param['num_recs'], config.tuning_prarm['num_users'])
+        config.num_slices, config.tuning_param['num_recs'], config.tuning_param['num_sims'])
     # Storage for the success rate.
     rates = list()
     for i in range(st.num_slices):
+        print "current slice: ", st.cur_slice
         st.cur_slice += 1
         train, test = utility.get_data_split(data, i)
         success = do_user_cf(train, test)
@@ -84,8 +84,8 @@ def do_cv():
     return st
 
 def main():
-    do_cv()
-    print(final_state)
+    final_state = do_cv()
+    print final_state
     final_state.term()
     return
 
