@@ -2,6 +2,8 @@
 \usepackage{nips15submit_e,times}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
 
 
@@ -113,7 +115,7 @@ Our contribution in this paper -- we recommended functions in spreadsheets by ap
 \section{Related Work}
 Researchers have been studying and analyzing spreadsheets to better comprehend the activity of the users and design better tools to assist them. Previous research has focused on extracting structured domain information from spreadsheets~\cite{hermans2010automatically} and visualizing spreadsheet using dataflow diagrams~\cite{hermans2011breviz} to enhance understandability of spreadsheets. For improving the maintainability and quality of the spreadsheet formulas, systems have been implemented to detect code smells in formulas and refactor them to resolve the detected smells~\cite{hermans2014detecting}. In contrast, our work attempts to increase the functionality awareness in spreadsheets by suggesting functions.
 
-Moreover, some research has used recommender systems to help users of a large software system with vast set of functionality to learn these functionalities. One of the early notable attempts is the OWL system~\cite{linton2000owl} developed by Linton et al., which suggests commands to Microsoft Word users based on the most popular algorithm. In OWL, commands are recommended to an individual if she is not using certain commands at all but the community is using them on a highly frequent basis. The underlying assumption of this system is that all users of a software system have a similar command usage distribution. Recommender systems were developed to improve upon the system delineated by Linton.
+Moreover, some research has used recommender systems to help users of a large software system with vast set of functionality to learn these functionalities. One of the early notable attempts is the OWL system~\cite{linton2000owl} developed by Linton et al., which suggests commands to Microsoft Word users based on the most popular algorithm. In OWL, commands are recommended to an individual if she is not using certain commands at all but the community is using them on a highly frequent basis. The underlying assumption of this system is that all users of a software system have a similar command usage distribution.
 
 Matejka and colleagues developed a collaborative filtering-based approach to recommend commands in AutoCAD, a computer aided drafting software, called CommunityCommands~\cite{matejka2009communitycommands}. Similarly based on the users' usage history, Murphy-Hill and colleagues studied several existing recommendation algorithms to recommend commands in Eclipse. The approach that we propose in this paper,  focuses on the algorithm used by OWL as a baseline and the user-based and item-based variations of the collaborative filtering algorithm used by CommunityCommands.
 
@@ -130,46 +132,79 @@ The Fuse spreadsheet corpus consists of nearly 250 thousand distinct spreadsheet
 Here, this user has used 'SUM', 'PLUS', and 'DIVIDE' functions 8, 179, and 179 times respectively over her spreadsheets in Fuse.
 
 \subsection{Collaborative Filtering}
-Collaborative filtering is a method of making automatic predictions (filtering) about the interests of a user by collecting preferences or taste information from many users (collaborating). The core concept of collaborative filtering is to apply a nearest neighbor method between a user's preferences and the preference of a large user community, and provide the user with recommendations by extrapolating based on how her selection or preference relates to that of the community.
+Collaborative filtering is a method of making automatic predictions (filtering) about the interests of a user by collecting preferences or taste information from many users (collaborating). The core concept of collaborative filtering is to apply a nearest neighbor method between a user's preferences and the preference of a large user community, and provide the user with recommendations by extrapolating based on how her selection or preference relates to that of the community. In our work, we look at the user-based and item-based variations of collaborative filtering.
 
 \subsubsection{User-based Collaborative Filtering}
 Although collaborative filtering can be applied in many ways, the approaches falling under the category of user-based collaborative filtering are composed of mainly two distinct steps~\cite{breese1998empirical} - find the users with similar preference patterns to that of the input user, and then use the preference of the similar users to obtain predictions for the input user.
 
+We use the user vectors extracted in the feature extraction step here. To compensate for the overriding influence of functions that are frequently used by a large number of users, we use a weighting function named 'function frequency inverse user frequency' (ff-iuf) which is similar to the well-known 'term frequency inverse document frequency' (tf-idf) technique used to determine the importance of a word or term to a document in a collection~\cite{sparck1972statistical}. The ff-iuf for an user $i$ and a function $j$ can be defined as:
+\begin{center}
+   $ff\mbox{-}iuf_{ij} = \alpha \cdot ff_{ij} \cdot iuf_{ij}$
+\end{center}
+
+Where, $\alpha$ is a tuning parameter, and
+\begin{center}
+   \begin{displaymath}
+   ff_{ij} = \frac{\mbox{Frequency of function j for user i}}{\mbox{Total frequency of all functions used by user i}}
+   \end{displaymath}
+\end{center}
+
+\begin{center}
+   \begin{displaymath}
+   iuf_{ij} = \log \frac{\mbox{Total number of users}}{\mbox{Number of users that use function j}}
+   \end{displaymath}
+\end{center}
+
+In the weighted vectors, a higher value signifies that function is used frequently by that individual user, but that function is used by a relatively small portion of the total users.
+
+To obtain the users with similar function usage to the input user, we used cosine similarity function that measures the angle between the users' vectors. When the cosine similarity is near zero, the angle between the vectors are closer to a right angle and the vectors are not very similar. On the other hand, if this value is close to 1, then the vectors are nearly colinear and are quite similar. By comparing the cosine similarity value between the input user and the other vectors, we determine the $n$ most similar users, where $n$ is another tuning paramter in our system.
+
+After we have the similar users, we recommend the top $m$ functions that are used by the similars but not by the input user, where $m$ is another tuning parameter. The recommended functions are ordered by their cumulative function frequency as described above over the $n$ similar users.
+
+\subsubsection{Item-based Collaborative Filtering}
+In this approach, using the ff-iuf weighted vectors used above, we define a vector for each function $j$, where a cell $i$ in the vector is the ff-iuf value for user $i$ and function $j$.
+
+Then we generate a function-to-function two dimensional similarity matrix $M$, where the matrix element $m_{jk}$ represents the cosine similarity value between function vectors for function $j$ and $k$.
+
+Given the input user, we recommend $m$ functions that are not used by the user, ordered by their similarity score from the similarity matrix, where for all function $i$ and function $k$, such that $i$ is not used but $k$ is used by input user:
+\begin{center}
+   \begin{displaymath}
+   \mbox{similarity score for function i}, s_i = average(m_{ik})
+   \end{displaymath}
+\end{center}
 
 
-To apply this technique, we need to measure the similarity between two users. In order to do so, we define a vector for each user's spreadsheets and compare the vectors to find the similar usages. Our function vector is defined such that the vector $V$ for an individual user consists of cells, where each cell $V_i$ represents the usage frequency of the function $f_i$.
-
-To generate the input user's vector we extract function usage frequencies from multiple files created by the user. The more spreadsheets created by the same user is given as input the better representative vector for the user's function usage we get. As for the potential \textit{pool} of similar user vectors, we used the spreadsheets of the Fuse corpus. The authors of Fuse extracted meta information such as the user name who created the spreadsheet along with function usage frequencies. We classified the spreadsheet meta information and discarded any spreadsheet that did not use any functions. This reduced the number of spreadsheets under consideration to less than 13 thousand. These spreadsheets were then grouped by the user name. We proceeded to extract the function vector from each of these groups in the similar way the input user vector was extracted. The final number of function vectors in this \textit{pool} of potential similar user vectors was \texttt{insert actual number from modified code here}.
-
-To measure the similarity between users, we used the cosine similarity function, which measures the cosine of the angle between the user's vectors as described above. When the similarity function evaluates closer to 0, the vectors are substantially orthogonal to each other, which indicates that the users are dissimilar with respect to function usage. A similarity function value of closer to 1, indicates that the vectors are nearly collinear and the users' function usages are quite similar.
-
-To find the similar user vectors for the given vector, we calculated the similarity function value between each of the vector in the \textit{pool} and the input vector, after this the vectors in the \textit{pool} were sorted based on their cosine distance in ascending order. We selected $n$ most similar vectors from this ordered list. Here, $n$ is a tuning parameter, which in our case was between 3 and 5.
-
-We compared the frequencies of each individual function between each of the similar vectors and the input vector, and added a function to the recommendation set only if the function had a frequency value in one of the similar vectors but not in the input vector. The set of recommended functions was then ordered by the aggregate frequency of the functions within the similar vectors, this way the functions in the recommendation list appeared in order of their usage in the similar vectors. Since the list of possible recommendations were quite large, we limited the number of functions suggested to a maximum of 10 for the sake of brevity and relevance.
-
-\subsection{Most Popular}
-Linton and colleagues introduced this algorithm in their OWL~\cite{linton2000owl} system which recommended commands in Microsoft Word. The most popular algorithm suggests functions that are most widely used by the community. To implement this algorithm, we took the cumulative frequency count for each function over all the spreadsheets in Fuse, which is referred to as the \textit{confidence level} of a function. When we are given an input user vector as described in the previous section, this algorithm recommends functions with highest confidence level values, excluding any function that is present in the user's input vector.
+\subsubsection{Most Popular}
+Linton and colleagues introduced this algorithm in their OWL~\cite{linton2000owl} system which recommended commands in Microsoft Word. The most popular algorithm suggests functions that are most widely used by the community but not used by the input user. To implement this algorithm, we took the cumulative frequency count for each function over all the spreadsheets in Fuse, which is referred to as the \textit{confidence level} of a function. When we are given an input user vector as described in the previous section, this algorithm recommends functions with highest confidence level values, excluding any function that is present in the user's input vector.
 
 The underlying assumption of this algorithm is that the functions most frequently used by the community are also the most useful functions. For this reason, this algorithm has an advantage over collaborative filtering - it can recommend functions to users whose function usage history is not known (the input vector consists of entirely zeros). However, this algorithm suffers from lack of personalization, as it does not take into consideration the usage frequencies of the functions in the input user vector.
 
 \section{Evaluation}
-For evaluating the system implemented based on the algorithm in the previous section, we used a cross validation technique, which enabled us to evaluate our system using the existing feature vectors extracted from the Fuse corpus. Cross validation is a model evaluation technique, where the input data is partitioned into two complementary subsets -- one subset is used to perform the analysis (training set) and the other is used to validate the analysis on the training set (testing set). Generally, multiple passes of cross validation are performed using different partitions  to cope with variance in the dataset and the results are averaged.
+For evaluating the system implemented based on the algorithm in the previous section, we used a cross validation technique, which enabled us to evaluate our system using the existing feature vectors extracted from the Fuse corpus. We used a 14 fold cross validation, splitting the entire set of ~7,000 user vectors in 14 slices and treating a single slice as testing set and the rest as our training set.
 
-We used a variation of cross validation, called Leave p-out (LPO) cross validation~\cite{arlot2010survey}. According to LPO, all possible training/testing partitions are generated by removing $p$ samples from the complete set. The testing set consists of the $p$ samples and the training set contains the rest $n-p$ samples, where $n$ is the size of the original dataset. Thus, a dataset of length $n$ will have $n \choose p$ possible partitions in LPO cross validation.
-
-We used the function vectors extracted from Fuse to perform LPO cross validation. In LPO cross validation, such a function vector $V_i$ will be partitioned into the training set $S_{training}$ and the testing set $S_{testing}$, where the size of $S_{testing}$ is $p$. The $S_{training}$ set with the rest of the function frequencies set to 0, is used as an input vector for the collaborative filtering and the most popular algorithm based recommender systems. Each system produces the recommendation set $R_S$. We define the correct number of recommendations for this partition as the number of functions that are both in set $R_S$ and $S_{testing}$ and calculate the result of the LPO evaluation for this function vector $h_i$ as:
-
-\begin{center}
-	\[
-	h_i = \frac{\sum\limits_{k=1}^{n} |R_{S_k} \cap S_{{testing}_k}|}{n}
-	\]
-\end{center}
-
-Where $k$ presents each distinct partition and $n$ is $|V_i|\choose p$. We calculated $h_i$ for every vector $V_i$ in the \textit{pool} with a $p$ value of 3. And finally, the $h_i$ values are averaged over the entire vector \textit{pool} from Fuse to get the evaluation result.
+In our cross validation, we took a single user vector from the testing set as input vector. In this input vector, we removed a function at ramdom and retrieved the recommendations for this modified input vector. If the set of recommendations contained the removed function, then we counted this as a successful recommendation. The success rate was represented as a percentage of each individual testing set. The overall 14-fold cross validation success rate was calculated as a mean of these individual 14 success rates.
 
 \section{Results}
+\begin{center}
+   \texttt{Under Construction}
+\end{center}
+For item-based approach, we had one tuning parameter - $m$, the number of functions recommended. We used four different values for $m$ - 1, 3, 5, 10. The following bar graph shows the comparative overall success rate for the different values for the number of recommendations retrieved.
+
+\begin{figure}[h]
+\begin{center}
+
+\end{center}
+\caption{Sample figure caption.}
+\end{figure}
+
+\subsection{Discussion \& Conclusion}
+\begin{center}
+   \texttt{Under Construction}
+\end{center}
 
 \bibliographystyle{unsrt}
 \bibliography{report}
+
+\section*{Appendix}
 
 \end{document}
