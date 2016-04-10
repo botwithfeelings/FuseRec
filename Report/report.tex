@@ -119,231 +119,55 @@ Matejka and colleagues developed a collaborative filtering-based approach to rec
 
 Both of the algorithms used in our work requires a source of function usage preference for the spreadsheet users' community. Although there are existent spreadsheet corpora like Enron~\cite{hermans2014enron} and EUSES~\cite{fisher2005euses} which have been valuable sources for spreadsheet analysts and researchers alike, in this paper we look into a very recently extracted spreadsheet corpus, Fuse~\cite{barik2015fuse}. Unlike Enron and EUSES which are very domain specific, Fuse contains a more diverse and much larger body of spreadsheets. Fuse is also reproducible, thus the recommender system in our work can leverage of a larger spreadsheet corpus if needed, which can be extracted by the system developed by Fuse's creators.
 
-\section{Headings: first level}
-\label{headings}
+The rest of the paper is organized as follows: we describe the feature extraction process by which we retrieved the user preferences to be used for the recommender systems, along with a brief explanation of how the collabor filtering and the baseline algorithms work. We then describe our evaluation strategy followed by the results observed. In the end, we discuss any threat to validity of our work and the future work that can be extended based on our contribution.
 
-First level headings are lower case (except for first word and proper nouns),
-flush left, bold and in point size 12. One line space before the first level
-heading and 1/2~line space after the first level heading.
-
-\subsection{Headings: second level}
-
-Second level headings are lower case (except for first word and proper nouns),
-flush left, bold and in point size 10. One line space before the second level
-heading and 1/2~line space after the second level heading.
-
-\subsubsection{Headings: third level}
-
-Third level headings are lower case (except for first word and proper nouns),
-flush left, bold and in point size 10. One line space before the third level
-heading and 1/2~line space after the third level heading.
-
-\section{Citations, figures, tables, references}
-\label{others}
-
-These instructions apply to everyone, regardless of the formatter being used.
-
-\subsection{Citations within the text}
-
-Citations within the text should be numbered consecutively. The corresponding
-number is to appear enclosed in square brackets, such as [1] or [2]-[5]. The
-corresponding references are to be listed in the same order at the end of the
-paper, in the \textbf{References} section. (Note: the standard
-\textsc{Bib\TeX} style \texttt{unsrt} produces this.) As to the format of the
-references themselves, any style is acceptable as long as it is used
-consistently.
-
-As submission is double blind, refer to your own published work in the 
-third person. That is, use ``In the previous work of Jones et al.\ [4]'',
-not ``In our previous work [4]''. If you cite your other papers that
-are not widely available (e.g.\ a journal paper under review), use
-anonymous author names in the citation, e.g.\ an author of the
-form ``A.\ Anonymous''. 
-
-
-\subsection{Footnotes}
-
-Indicate footnotes with a number\footnote{Sample of the first footnote} in the
-text. Place the footnotes at the bottom of the page on which they appear.
-Precede the footnote with a horizontal rule of 2~inches
-(12~picas).\footnote{Sample of the second footnote}
-
-\subsection{Figures}
-
-All artwork must be neat, clean, and legible. Lines should be dark
-enough for purposes of reproduction; art work should not be
-hand-drawn. The figure number and caption always appear after the
-figure. Place one line space before the figure caption, and one line
-space after the figure. The figure caption is lower case (except for
-first word and proper nouns); figures are numbered consecutively.
-
-Make sure the figure caption does not get separated from the figure.
-Leave sufficient space to avoid splitting the figure and figure caption.
-
-You may use color figures. 
-However, it is best for the
-figure captions and the paper body to make sense if the paper is printed
-either in black/white or in color.
-\begin{figure}[h]
+\section{Methodology}
+\subsection{Feature Extraction}
+The Fuse spreadsheet corpus consists of nearly 250 thousand distinct spreadsheets. The creators of Fuse extracted the meta information for these spreadsheets in json format using Apache POI library which includes the user that created and last modified the spreadsheet, and the frequency of functions being used in the spreadsheet. We identified almost 7,000 individual users by combining the created by and last modified by meta information with the domain name where the spreadsheet was originally extracted. This gave us a collection of nearly 7,000 user vectors such that the vector $V$ for an individual user consists of cells, where each cell $V_i$ represents the usage frequency of the function $f_i$. Consider the sample user identifying key, user vector tuple below:
 \begin{center}
-%\framebox[4.0in]{$\;$}
-\fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+   \texttt{('Greenfield, Laura\#Greenfield, Laura\#www.cde.state.co.us', \{'SUM': 8, 'Plus': 179, 'Divide': 179\})}
 \end{center}
-\caption{Sample figure caption.}
-\end{figure}
+Here, this user has used 'SUM', 'PLUS', and 'DIVIDE' functions 8, 179, and 179 times respectively over her spreadsheets in Fuse.
 
-\subsection{Tables}
+\subsection{Collaborative Filtering}
+Collaborative filtering is a method of making automatic predictions (filtering) about the interests of a user by collecting preferences or taste information from many users (collaborating). The core concept of collaborative filtering is to apply a nearest neighbor method between a user's preferences and the preference of a large user community, and provide the user with recommendations by extrapolating based on how her selection or preference relates to that of the community.
 
-All tables must be centered, neat, clean and legible. Do not use hand-drawn
-tables. The table number and title always appear before the table. See
-Table~\ref{sample-table}.
+\subsubsection{User-based Collaborative Filtering}
+Although collaborative filtering can be applied in many ways, the approaches falling under the category of user-based collaborative filtering are composed of mainly two distinct steps~\cite{breese1998empirical} - find the users with similar preference patterns to that of the input user, and then use the preference of the similar users to obtain predictions for the input user.
 
-Place one line space before the table title, one line space after the table
-title, and one line space after the table. The table title must be lower case
-(except for first word and proper nouns); tables are numbered consecutively.
 
-\begin{table}[t]
-\caption{Sample table title}
-\label{sample-table}
+
+To apply this technique, we need to measure the similarity between two users. In order to do so, we define a vector for each user's spreadsheets and compare the vectors to find the similar usages. Our function vector is defined such that the vector $V$ for an individual user consists of cells, where each cell $V_i$ represents the usage frequency of the function $f_i$.
+
+To generate the input user's vector we extract function usage frequencies from multiple files created by the user. The more spreadsheets created by the same user is given as input the better representative vector for the user's function usage we get. As for the potential \textit{pool} of similar user vectors, we used the spreadsheets of the Fuse corpus. The authors of Fuse extracted meta information such as the user name who created the spreadsheet along with function usage frequencies. We classified the spreadsheet meta information and discarded any spreadsheet that did not use any functions. This reduced the number of spreadsheets under consideration to less than 13 thousand. These spreadsheets were then grouped by the user name. We proceeded to extract the function vector from each of these groups in the similar way the input user vector was extracted. The final number of function vectors in this \textit{pool} of potential similar user vectors was \texttt{insert actual number from modified code here}.
+
+To measure the similarity between users, we used the cosine similarity function, which measures the cosine of the angle between the user's vectors as described above. When the similarity function evaluates closer to 0, the vectors are substantially orthogonal to each other, which indicates that the users are dissimilar with respect to function usage. A similarity function value of closer to 1, indicates that the vectors are nearly collinear and the users' function usages are quite similar.
+
+To find the similar user vectors for the given vector, we calculated the similarity function value between each of the vector in the \textit{pool} and the input vector, after this the vectors in the \textit{pool} were sorted based on their cosine distance in ascending order. We selected $n$ most similar vectors from this ordered list. Here, $n$ is a tuning parameter, which in our case was between 3 and 5.
+
+We compared the frequencies of each individual function between each of the similar vectors and the input vector, and added a function to the recommendation set only if the function had a frequency value in one of the similar vectors but not in the input vector. The set of recommended functions was then ordered by the aggregate frequency of the functions within the similar vectors, this way the functions in the recommendation list appeared in order of their usage in the similar vectors. Since the list of possible recommendations were quite large, we limited the number of functions suggested to a maximum of 10 for the sake of brevity and relevance.
+
+\subsection{Most Popular}
+Linton and colleagues introduced this algorithm in their OWL~\cite{linton2000owl} system which recommended commands in Microsoft Word. The most popular algorithm suggests functions that are most widely used by the community. To implement this algorithm, we took the cumulative frequency count for each function over all the spreadsheets in Fuse, which is referred to as the \textit{confidence level} of a function. When we are given an input user vector as described in the previous section, this algorithm recommends functions with highest confidence level values, excluding any function that is present in the user's input vector.
+
+The underlying assumption of this algorithm is that the functions most frequently used by the community are also the most useful functions. For this reason, this algorithm has an advantage over collaborative filtering - it can recommend functions to users whose function usage history is not known (the input vector consists of entirely zeros). However, this algorithm suffers from lack of personalization, as it does not take into consideration the usage frequencies of the functions in the input user vector.
+
+\section{Evaluation}
+For evaluating the system implemented based on the algorithm in the previous section, we used a cross validation technique, which enabled us to evaluate our system using the existing feature vectors extracted from the Fuse corpus. Cross validation is a model evaluation technique, where the input data is partitioned into two complementary subsets -- one subset is used to perform the analysis (training set) and the other is used to validate the analysis on the training set (testing set). Generally, multiple passes of cross validation are performed using different partitions  to cope with variance in the dataset and the results are averaged.
+
+We used a variation of cross validation, called Leave p-out (LPO) cross validation~\cite{arlot2010survey}. According to LPO, all possible training/testing partitions are generated by removing $p$ samples from the complete set. The testing set consists of the $p$ samples and the training set contains the rest $n-p$ samples, where $n$ is the size of the original dataset. Thus, a dataset of length $n$ will have $n \choose p$ possible partitions in LPO cross validation.
+
+We used the function vectors extracted from Fuse to perform LPO cross validation. In LPO cross validation, such a function vector $V_i$ will be partitioned into the training set $S_{training}$ and the testing set $S_{testing}$, where the size of $S_{testing}$ is $p$. The $S_{training}$ set with the rest of the function frequencies set to 0, is used as an input vector for the collaborative filtering and the most popular algorithm based recommender systems. Each system produces the recommendation set $R_S$. We define the correct number of recommendations for this partition as the number of functions that are both in set $R_S$ and $S_{testing}$ and calculate the result of the LPO evaluation for this function vector $h_i$ as:
+
 \begin{center}
-\begin{tabular}{ll}
-\multicolumn{1}{c}{\bf PART}  &\multicolumn{1}{c}{\bf DESCRIPTION}
-\\ \hline \\
-Dendrite         &Input terminal \\
-Axon             &Output terminal \\
-Soma             &Cell body (contains cell nucleus) \\
-\end{tabular}
+	\[
+	h_i = \frac{\sum\limits_{k=1}^{n} |R_{S_k} \cap S_{{testing}_k}|}{n}
+	\]
 \end{center}
-\end{table}
 
-\section{Final instructions}
-Do not change any aspects of the formatting parameters in the style files.
-In particular, do not modify the width or length of the rectangle the text
-should fit into, and do not change font sizes (except perhaps in the
-\textbf{References} section; see below). Please note that pages should be
-numbered.
+Where $k$ presents each distinct partition and $n$ is $|V_i|\choose p$. We calculated $h_i$ for every vector $V_i$ in the \textit{pool} with a $p$ value of 3. And finally, the $h_i$ values are averaged over the entire vector \textit{pool} from Fuse to get the evaluation result.
 
-\section{Preparing PostScript or PDF files}
-
-Please prepare PostScript or PDF files with paper size ``US Letter'', and
-not, for example, ``A4''. The -t
-letter option on dvips will produce US Letter files.
-
-Fonts were the main cause of problems in the past years. Your PDF file must
-only contain Type 1 or Embedded TrueType fonts. Here are a few instructions
-to achieve this.
-
-\begin{itemize}
-
-\item You can check which fonts a PDF files uses.  In Acrobat Reader,
-select the menu Files$>$Document Properties$>$Fonts and select Show All Fonts. You can
-also use the program \verb+pdffonts+ which comes with \verb+xpdf+ and is
-available out-of-the-box on most Linux machines.
-
-\item The IEEE has recommendations for generating PDF files whose fonts
-are also acceptable for NIPS. Please see
-\url{http://www.emfield.org/icuwb2010/downloads/IEEE-PDF-SpecV32.pdf}
-
-\item LaTeX users:
-
-\begin{itemize}
-
-\item Consider directly generating PDF files using \verb+pdflatex+
-(especially if you are a MiKTeX user). 
-PDF figures must be substituted for EPS figures, however.
-
-\item Otherwise, please generate your PostScript and PDF files with the following commands:
-\begin{verbatim} 
-dvips mypaper.dvi -t letter -Ppdf -G0 -o mypaper.ps
-ps2pdf mypaper.ps mypaper.pdf
-\end{verbatim}
-
-Check that the PDF files only contains Type 1 fonts. 
-%For the final version, please send us both the Postscript file and
-%the PDF file. 
-
-\item xfig "patterned" shapes are implemented with 
-bitmap fonts.  Use "solid" shapes instead. 
-\item The \verb+\bbold+ package almost always uses bitmap
-fonts.  You can try the equivalent AMS Fonts with command
-\begin{verbatim}
-\usepackage[psamsfonts]{amssymb}
-\end{verbatim}
- or use the following workaround for reals, natural and complex: 
-\begin{verbatim}
-\newcommand{\RR}{I\!\!R} %real numbers
-\newcommand{\Nat}{I\!\!N} %natural numbers 
-\newcommand{\CC}{I\!\!\!\!C} %complex numbers
-\end{verbatim}
-
-\item Sometimes the problematic fonts are used in figures
-included in LaTeX files. The ghostscript program \verb+eps2eps+ is the simplest
-way to clean such figures. For black and white figures, slightly better
-results can be achieved with program \verb+potrace+.
-\end{itemize}
-\item MSWord and Windows users (via PDF file):
-\begin{itemize}
-\item Install the Microsoft Save as PDF Office 2007 Add-in from
-\url{http://www.microsoft.com/downloads/details.aspx?displaylang=en\&familyid=4d951911-3e7e-4ae6-b059-a2e79ed87041}
-\item Select ``Save or Publish to PDF'' from the Office or File menu
-\end{itemize}
-\item MSWord and Mac OS X users (via PDF file):
-\begin{itemize}
-\item From the print menu, click the PDF drop-down box, and select ``Save
-as PDF...''
-\end{itemize}
-\item MSWord and Windows users (via PS file):
-\begin{itemize}
-\item To create a new printer
-on your computer, install the AdobePS printer driver and the Adobe Distiller PPD file from
-\url{http://www.adobe.com/support/downloads/detail.jsp?ftpID=204} {\it Note:} You must reboot your PC after installing the
-AdobePS driver for it to take effect.
-\item To produce the ps file, select ``Print'' from the MS app, choose
-the installed AdobePS printer, click on ``Properties'', click on ``Advanced.''
-\item Set ``TrueType Font'' to be ``Download as Softfont''
-\item Open the ``PostScript Options'' folder
-\item Select ``PostScript Output Option'' to be ``Optimize for Portability''
-\item Select ``TrueType Font Download Option'' to be ``Outline''
-\item Select ``Send PostScript Error Handler'' to be ``No''
-\item Click ``OK'' three times, print your file.
-\item Now, use Adobe Acrobat Distiller or ps2pdf to create a PDF file from
-the PS file. In Acrobat, check the option ``Embed all fonts'' if
-applicable.
-\end{itemize}
-
-\end{itemize}
-If your file contains Type 3 fonts or non embedded TrueType fonts, we will
-ask you to fix it. 
-
-\subsection{Margins in LaTeX}
- 
-Most of the margin problems come from figures positioned by hand using
-\verb+\special+ or other commands. We suggest using the command
-\verb+\includegraphics+
-from the graphicx package. Always specify the figure width as a multiple of
-the line width as in the example below using .eps graphics
-\begin{verbatim}
-   \usepackage[dvips]{graphicx} ... 
-   \includegraphics[width=0.8\linewidth]{myfile.eps} 
-\end{verbatim}
-or % Apr 2009 addition
-\begin{verbatim}
-   \usepackage[pdftex]{graphicx} ... 
-   \includegraphics[width=0.8\linewidth]{myfile.pdf} 
-\end{verbatim}
-for .pdf graphics. 
-See section 4.4 in the graphics bundle documentation (\url{http://www.ctan.org/tex-archive/macros/latex/required/graphics/grfguide.ps}) 
- 
-A number of width problems arise when LaTeX cannot properly hyphenate a
-line. Please give LaTeX hyphenation hints using the \verb+\-+ command.
-
-
-\subsubsection*{Acknowledgments}
-
-Use unnumbered third level headings for the acknowledgments. All
-acknowledgments go at the end of the paper. Do not include 
-acknowledgments in the anonymized submission, only in the 
-final paper.
+\section{Results}
 
 \bibliographystyle{unsrt}
 \bibliography{report}
