@@ -185,26 +185,58 @@ For evaluating the system implemented based on the algorithm in the previous sec
 In our cross validation, we took a single user vector from the testing set as input vector. In this input vector, we removed a function at ramdom and retrieved the recommendations for this modified input vector. If the set of recommendations contained the removed function, then we counted this as a successful recommendation. The success rate was represented as a percentage of each individual testing set. The overall 14-fold cross validation success rate was calculated as a mean of these individual 14 success rates.
 
 \section{Results}
-\begin{center}
-   \texttt{Under Construction}
-\end{center}
-For item-based approach, we had one tuning parameter - $m$, the number of functions recommended. We used four different values for $m$ - 1, 3, 5, 10. The following bar graph shows the comparative overall success rate for the different values for the number of recommendations retrieved.
+For item-based approach, we had one tuning parameter - $m$, the number of functions recommended. We used four different values for $m$: 1, 3, 5, 10. The bar graph in figure \ref{fig:itemresults} shows the comparative overall success rate for the different values for the number of recommendations retrieved.
 
 \begin{figure}[h]
 \begin{center}
-
+\includegraphics[width=0.75\textwidth]{Item}
 \end{center}
-\caption{Sample figure caption.}
+\caption{Item-based CF: number of recommendations vs success rate}
+\label{fig:itemresults}
 \end{figure}
 
-\subsection{Discussion \& Conclusion}
 \begin{center}
    \texttt{Under Construction}
+   \begin{itemize}
+      \item Specify tuning parameters - number of similar users and number of recommendations retrieved for user-based CF along with bar chart graphics to display results.
+      \item Specify the tuning paramters - number of recommendations retrieved for baseline algorithm along with bar chart graphics to display results.
+      \item Comparative results graphics featuring cluster bar graphics to show overall results for all three algorithms.
+   \end{itemize}
+\end{center}
+
+\section{Discussion}
+From the results of the item-based collaborative filtering algorithm, we can conclude that the recommendations become more effective as we increase the number of recommendations retrieved $m$, but the effectiveness of the recommendations start to pleateau after the value of $m$ reaches 5.
+\begin{center}
+   \texttt{Under Construction}
+   \begin{itemize}
+      \item Discuss results for user-based cf.
+      \item Discuss comparative performance against baseline.
+      \item Address any threats to validity.
+   \end{itemize}
+\end{center}
+
+\section{Future Work \& Conclusion}
+\begin{center}
+   \texttt{Under Construction}
+   \begin{itemize}
+      \item Recapitulate contributions.
+      \item Discuss on the excel plug-in and other future work.
+   \end{itemize}
 \end{center}
 
 \bibliographystyle{unsrt}
 \bibliography{report}
 
+\pagebreak
+
 \section*{Appendix}
+\textbf{Prior roadmap:} By April demo, feature extraction, both algorithms, cross validation framework.
+\textbf{Current roadmap:} Done: feature extraction, CF algorithms implementation, cross validation framework, cross validation results for item-based CF. Working on: baseline, cross validation results for user-based CF and baseline.
+\subsection*{Contributions}
+\begin{itemize}
+   \item Shaown: feature extraction, CF algorithm implementations, cross validation infrastructure.
+   \item Matthew: cross validation framework implementation, results logging, running cross validation for item-based CF and collect results.
+   \item Nisarg: baseline implementation, cross validation implementation for baseline, running cross validation for baseline and collect results.
+\end{itemize}
 
 \end{document}
