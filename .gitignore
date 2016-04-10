@@ -1,6 +1,11 @@
 *.aux
+*.bbl
+*.bib
+*.blg
+*.dvi
 *.log
 *.out
+*.ps
 *.pyc
 .idea/*
 FuseRec/.idea/*
