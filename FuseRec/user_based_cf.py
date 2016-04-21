@@ -1,5 +1,5 @@
 from __future__ import division
-from random import choice
+import numpy as np
 
 import utility
 import config
@@ -49,7 +49,7 @@ def do_user_cf(train, test):
         print "test user " + str(count) + " of " + str(len(test))
         count += 1
         # The function to be removed at random.
-        test_func = choice(data.keys())
+        test_func = np.random.choice(data.keys())
         data.pop(test_func)
 
         # Add this modified vector to the training set.

@@ -1,8 +1,9 @@
 from __future__ import division
 
 from math import sqrt, ceil
-from pickle import load
-from math import log
+from cPickle import load
+# from math import log
+from numpy import log
 import config
 
 
