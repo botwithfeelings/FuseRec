@@ -2,7 +2,6 @@ from __future__ import division
 
 from math import sqrt, ceil
 from cPickle import load
-# from math import log
 from numpy import log
 import config
 
@@ -17,11 +16,21 @@ def average(l):
 # Yields n chunks from list l.
 def get_chunks(l, n):
     size = int(ceil(len(l)/n))
-    retList = list()
+    ret_list = list()
     for i in xrange(0, len(l), size):
-        retList.append(l[i:i+size])
+        ret_list.append(l[i:i+size])
 
-    return retList
+    return ret_list
+
+
+# Returns the most popular list of functions from a set of training data.
+def generate_most_popular_list(d):
+    pop_list = dict()
+    for val in d.itervalues():
+        pop_list.update((func, pop_list.get(func, 0) + freq) for func, freq in val.iteritems())
+
+    return sorted(pop_list, key=pop_list.get, reverse=True)
+
 
 # Get training and testing data set from the given data,
 # where testing data contains the pairs in the chunk and

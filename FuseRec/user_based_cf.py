@@ -42,6 +42,7 @@ def get_recommendations(data, user):
 
     return recs
 
+
 def do_user_cf(train, test):
     success = 0
     count = 0
@@ -80,8 +81,9 @@ def do_cv():
         st.cur_slice += 1
         train, test = utility.get_data_split(data, i)
         success = do_user_cf(train, test)
-        st.rates = ((success, len(test)))
+        st.rates = (success, len(test))
     return st
+
 
 def main():
     final_state = do_cv()

@@ -1,115 +1,59 @@
 import utility
 import config
+
 from random import choice
-from itertools import islice
-import operator
+from state import *
 
 
-# Getting the most Frequently used functions in this method
-# Receive the training set data
-def getMostFrequent(dataset):
+# Get recommendations for user, where the functions are in the most popular list but not in the user's list.
+def get_recommendations(mp, data):
+    recs = [f for f in mp if f not in data.keys()]
 
-    #define a dictionary with key:value corresponding to function:count
-    function_total = dict()
+    if len(recs) > config.tuning_param["num_recs"]:
+        recs = recs[0: config.tuning_param["num_recs"]]
 
-    # Iterate through the training set
-    for (user, data) in dataset.iteritems():
-        # Iterate through the function dictionary for each user
-        for (function, count) in data.iteritems():
-            if function_total.has_key(function):    # Check if the main dictionary contains this function
-                fcount = function_total.get(function)
-                fcount = fcount + count             # If yes, add the current user's count to the overall total
-                function_total[function] = fcount
-            else:
-                function_total[function] = count    # If not, add the function to the dictionary
-    mostFrequent = sorted(function_total, key = function_total.get, reverse=True)   # Sorting the functions by count, return a list
-    return mostFrequent
+    return recs
 
 
-def getRecList(mFrequent, testUserFlist):
-
-    # list of Recommendations
-    recList = []
-
-    #print type(testUserFlist)
-    # Iterate through each function in Most Frequent list, received from training set.
-    for function in mFrequent:
-
-        # If function not in the list of functions used by the user, then add to list of recommendations
-        if function not in testUserFlist.keys():
-            recList.append(function)
-
-    # If the list of recommendations is larger than the predefined number of recommendations, prune it.
-    if len(recList) > config.tuning_param["num_recs"]:
-        recList = recList[0:config.tuning_param["num_recs"]]
-
-    return recList
-
-def recommendBaseline(trainset, testset):
-
+def do_most_popular(train, test):
     success = 0
-    # Calling the function to get most Frequent Functions from the training set
-    mFrequentFunctions = getMostFrequent(trainset)
 
-    # Iterating through each user in testset
-    for (user, data) in testset.iteritems():
+    # Generate the similarity matrix for the given data.
+    mp = utility.generate_most_popular_list(train)
 
-        # Leave out one function randomly from the list and pop it.
-        testFunc = choice(data.keys())
-        data.pop(testFunc)
-        #print data
+    for data in test.itervalues():
+        # The function to be removed.
+        test_func = choice(data.keys())
+        data.pop(test_func)
 
-        # Call the function to get recommendations. Returns a list of recommendations
-        if testFunc in getRecList(mFrequentFunctions, data):
-            success = success + 1
+        # Get the recommendation for the user in training data.
+        if test_func in get_recommendations(mp, data):
+            success += 1
+
     return success
 
-def doCVBaseline():
 
-    # Get the overall dataset of 6917 records
-    dataset = utility.load_vectors()
-    print len(dataset)
+def do_cv():
+    # Load the user vectors.
+    data = utility.load_vectors()
+    outfile_string = "baseline_slice" + str(config.num_slices) \
+                     + "_rec" + str(config.tuning_param['num_recs']) + ".txt"
+    rates = list()
+    st = state('Item Based', rates, outfile_string, "INFO", config.num_slices, config.tuning_param['num_recs'])
+    for i in xrange(st.num_slices):
+        st.cur_slice += 1
+        train, test = utility.get_data_split(data, i)
+        success = do_most_popular(train, test)
+        st.rates = (success, len(test))
+    return st
 
-    # Storing successful recommendations per CV set
-    successPerSet = []
-    for i in range(config.num_slices):
-        train, test = utility.get_data_split(dataset, i)
-        print len(train)
-        print len(test)
-
-        # Calling the function for the Baseline algorithm
-        success = recommendBaseline(train, test)
-        successPerSet.append(success)
-
-        # Printing successful number of recommendations in this test set.
-        print success
 
 def main():
-    doCVBaseline()
+    final_state = do_cv()
+    print(final_state)
+    final_state.term()
+    return
 
-if __name__== "__main__":
+
+if __name__ == "__main__":
     main()
-
-#nitems = take(4, sorted(function_total.iteritems(), key=operator.itemgetter(1), reverse=True))
-#print nitems
-'''
-dict2 = {'x':5, 'a': 7, 'b':4, 'z':12, 'm':30}
-sDict = dict2.keys()
-#sDict = sorted(dict2.values(), reverse=True)
-#s2 = sorted(dict2)
-#print type(s2)
-print sDict
-item = dict2.popitem()
-print item
-print type(sDict)
-#print sDict.has_key('z')
-#nitems2 = take(3, sDict)
-#print nitems2['z']
-#print nitems2
-#print len(function_total)
-
-listx = dataset.values()
-firstdict = listx[1]
-print firstdict.get('Divide')
-for i in range(4):
-    print firstdict.popitem()'''
