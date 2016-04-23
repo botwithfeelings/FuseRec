@@ -1,66 +1,91 @@
 import utility
 import config
+from random import choice
 from itertools import islice
 import operator
 
-'''
-dataset = utility.load_vectors()
-function_total = dict()
-print len(function_total)
-for (user, data) in dataset.iteritems():
-    for (function, count) in data.iteritems():
-        if function_total.has_key(function):
-            fcount = function_total.get(function)
-            fcount = fcount + count
-            function_total[function] = fcount
-        else:
-            function_total[function] = count
-mostFrequent = sorted(function_total, key=function_total.get, reverse=True)
-'''
+
+# Getting the most Frequently used functions in this method
+# Receive the training set data
 def getMostFrequent(dataset):
+
+    #define a dictionary with key:value corresponding to function:count
     function_total = dict()
+
+    # Iterate through the training set
     for (user, data) in dataset.iteritems():
+        # Iterate through the function dictionary for each user
         for (function, count) in data.iteritems():
-            if function_total.has_key(function):
+            if function_total.has_key(function):    # Check if the main dictionary contains this function
                 fcount = function_total.get(function)
-                fcount = fcount + count
+                fcount = fcount + count             # If yes, add the current user's count to the overall total
                 function_total[function] = fcount
             else:
-                function_total[function] = count
-    mostFrequent = sorted(function_total, key = function_total.get, reverse=True)
+                function_total[function] = count    # If not, add the function to the dictionary
+    mostFrequent = sorted(function_total, key = function_total.get, reverse=True)   # Sorting the functions by count, return a list
     return mostFrequent
 
-def baseline(dataset):
-    successPerSet = []
-    for i in range(config.num_slices):
-        train, test = utility.get_data_split(dataset, i)
-        # Retrieving functions and the counts from each training set
-        mFrequentFunctions = getMostFrequent(train)
-        success = recommendBaseline(mFrequentFunctions, test)
-        successPerSet.append(success)
-        print successPerSet
 
+def getRecList(mFrequent, testUserFlist):
 
-def recommendBaseline(orderedFunctions, testset):
+    # list of Recommendations
     recList = []
+
+    #print type(testUserFlist)
+    # Iterate through each function in Most Frequent list, received from training set.
+    for function in mFrequent:
+
+        # If function not in the list of functions used by the user, then add to list of recommendations
+        if function not in testUserFlist.keys():
+            recList.append(function)
+
+    # If the list of recommendations is larger than the predefined number of recommendations, prune it.
+    if len(recList) > config.tuning_param["num_recs"]:
+        recList = recList[0:config.tuning_param["num_recs"]]
+
+    return recList
+
+def recommendBaseline(trainset, testset):
+
     success = 0
+    # Calling the function to get most Frequent Functions from the training set
+    mFrequentFunctions = getMostFrequent(trainset)
+
+    # Iterating through each user in testset
     for (user, data) in testset.iteritems():
-        fList = data.keys()
-        rmFunction = data.popitem()
-        #print type(rmFunction)
-        for func in orderedFunctions:
-            if func not in fList:
-                recList.append(func)
-            if len(recList) == 10:
-                break
-        if rmFunction[0] in recList:
+
+        # Leave out one function randomly from the list and pop it.
+        testFunc = choice(data.keys())
+        data.pop(testFunc)
+        #print data
+
+        # Call the function to get recommendations. Returns a list of recommendations
+        if testFunc in getRecList(mFrequentFunctions, data):
             success = success + 1
     return success
 
+def doCVBaseline():
+
+    # Get the overall dataset of 6917 records
+    dataset = utility.load_vectors()
+    print len(dataset)
+
+    # Storing successful recommendations per CV set
+    successPerSet = []
+    for i in range(config.num_slices):
+        train, test = utility.get_data_split(dataset, i)
+        print len(train)
+        print len(test)
+
+        # Calling the function for the Baseline algorithm
+        success = recommendBaseline(train, test)
+        successPerSet.append(success)
+
+        # Printing successful number of recommendations in this test set.
+        print success
 
 def main():
-    dataset = utility.load_vectors()
-    baseline(dataset)
+    doCVBaseline()
 
 if __name__== "__main__":
     main()
