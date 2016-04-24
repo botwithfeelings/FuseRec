@@ -1,0 +1,23 @@
+----------------------------------------------------------------------------------------------------
+Algo:Item Based	 Num_slices:14	 Num_recs: 10	
+Slice:1	Success:433	Total:494	Rate:0.876518
+Slice:2	Success:433	Total:494	Rate:0.876518
+Slice:3	Success:433	Total:494	Rate:0.876518
+Slice:4	Success:433	Total:494	Rate:0.876518
+Slice:5	Success:431	Total:494	Rate:0.872470
+Slice:6	Success:435	Total:494	Rate:0.880567
+Slice:7	Success:429	Total:494	Rate:0.868421
+Slice:8	Success:433	Total:494	Rate:0.876518
+Slice:9	Success:425	Total:494	Rate:0.860324
+Slice:10	Success:431	Total:494	Rate:0.872470
+Slice:11	Success:427	Total:494	Rate:0.864372
+Slice:12	Success:434	Total:494	Rate:0.878543
+Slice:13	Success:427	Total:494	Rate:0.864372
+Slice:14	Success:431	Total:491	Rate:0.877800
+----------------------------------------------------------------------------------------------------
+FINAL: 
+ALGO: Item Based
+OVERALL_SUCCESS_RATE: 0.872993
+NUM_SLICES: 14
+NUM_RECS: 10
+----------------------------------------------------------------------------------------------------
