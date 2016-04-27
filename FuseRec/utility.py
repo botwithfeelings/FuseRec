@@ -63,6 +63,10 @@ def get_weighted_vectors(d, cache=None):
     for (user, data) in d.iteritems():
         # Iterate through and normalize the each user vector.
         user_sum = sum([v for v in data.itervalues()])
+        #for (k,v) in data.iteritems():
+            #print "v: ", v
+            #print "user_sum: ", user_sum
+
         data.update((k, v/user_sum) for (k, v) in data.iteritems())
 
         # Now get the weighted vector values using inverse user frequency.
