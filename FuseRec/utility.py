@@ -2,7 +2,8 @@ from __future__ import division
 
 from math import sqrt, ceil
 from cPickle import load
-from numpy import log
+from numpy import log, errstate
+import warnings
 import config
 
 
@@ -63,13 +64,9 @@ def get_weighted_vectors(d, cache=None):
     for (user, data) in d.iteritems():
         # Iterate through and normalize the each user vector.
         user_sum = sum([v for v in data.itervalues()])
-        #for (k,v) in data.iteritems():
-            #print "v: ", v
-            #print "user_sum: ", user_sum
 
-        data.update((k, v/user_sum) for (k, v) in data.iteritems())
+        data.update( (k, (0 if v == 0 else v/user_sum)) for (k, v) in data.iteritems())
 
-        # Now get the weighted vector values using inverse user frequency.
         data.update((k, config.tuning_param["alpha"] * v * get_inverse_user_freq(k, d, cache))
                     for (k, v) in data.iteritems())
 
