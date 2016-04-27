@@ -13,6 +13,6 @@ num_slices = 14
 tuning_param = dict(
     alpha=10,
     expected_freq_weight=10,
-    num_sims=10,
+    num_sims=20,
     num_recs=1
 )
