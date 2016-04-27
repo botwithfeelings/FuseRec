@@ -49,19 +49,24 @@ def get_data_split(data, chunk):
 
 
 # Natural log of total users / no. of users using function f in vector set v.
-def get_inverse_user_freq(f, v):
+def get_inverse_user_freq(f, v, cache=None):
+    # If a cache is passed then do a simple lookup.
+    if cache is not None:
+        return log(len(v) / cache.get(f))
+
+    # Otherwise do it in the costly way.
     return log(len(v)/sum([f in data.keys() for data in v.itervalues()]))
 
 
 # Get the function-freq inverse-user-freq weighted values for the passed in data.
-def get_weighted_vectors(d):
+def get_weighted_vectors(d, cache=None):
     for (user, data) in d.iteritems():
         # Iterate through and normalize the each user vector.
         user_sum = sum([v for v in data.itervalues()])
         data.update((k, v/user_sum) for (k, v) in data.iteritems())
 
         # Now get the weighted vector values using inverse user frequency.
-        data.update((k, config.tuning_param["alpha"] * v * get_inverse_user_freq(k, d))
+        data.update((k, config.tuning_param["alpha"] * v * get_inverse_user_freq(k, d, cache))
                     for (k, v) in data.iteritems())
 
         d[user] = data
