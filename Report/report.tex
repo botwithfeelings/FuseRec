@@ -37,7 +37,7 @@ Raleigh, NC 27606 \\
 \maketitle
 
 \begin{abstract}
-Spreadsheets are the most widely used form of end-user programming. Although spreadsheets have a large array of functions built-in, the majority of spreadsheet users often do not utilize them in performing their tasks. To address this lack of function usage, we investigate recommender system technologies and consider two distinct approaches to a function recommender system for spreadsheets. In our work, we apply two variations of the collaborative filtering algorithm to produce personalized function recommendations for spreadsheet users by applying these algorithms on the Fuse spreadsheet corpus. We compare the performance of the algorithms used with a baseline of the Most Popular algorithm, also known as Linton's algorithm. In this paper, we present the feature extraction process from the spreadsheet corpus, the algorithms used and their comparative performance. Finally, we also outline the roadmap to use our findings to create an Excel plugin for increasing functional awareness.
+Spreadsheets are the most widely used form of end-user programming. Although spreadsheets have a large array of functions built-in, the majority of spreadsheet users often do not utilize them in performing their tasks. To address this lack of function usage, we investigate recommender system technologies and consider two distinct approaches to a function recommender system for spreadsheets. In our work, we apply two variations of the collaborative filtering algorithm to produce personalized function recommendations for spreadsheet users by applying these algorithms on the Fuse spreadsheet corpus. We compare the performance of the algorithms used with a baseline of the Most Popular algorithm, also known as Linton's algorithm. In this paper, we present the feature extraction process from the spreadsheet corpus, the algorithms used and their comparative performance. Our cross validation results show that with a limited number of recommendations, our item-based recommendation algorithm performs significantly well compared to the baseline and the user-based approach.
 \end{abstract}
 
 \section{Introduction}
@@ -215,26 +215,14 @@ From the results of the item-based collaborative filtering algorithm, we can con
    \end{itemize}
 \end{center}
 
-\section{Future Work \& Conclusion}
-\begin{center}
-   \texttt{Under Construction}
-   \begin{itemize}
-      \item Recapitulate contributions.
-      \item Discuss on the excel plug-in and other future work.
-   \end{itemize}
-\end{center}
+\section{Future Work}
+One of the salient limitations of the recommendation systems used in this work was that the function usage rate and diversity was quite low in the Fuse spreadsheet corpus, where only a very small percentage of the spreadsheets contained function usage. This however can be alleviated considerably by incorporating other existing spreadsheet corpus like Enron~\cite{hermans2014enron} and EUSES~\cite{fisher2005euses} into the extracted user function vectors used in our algorithms.
+
+Spreadsheet files, being static, do not contain any temporal or sequential information regarding function discovery. Given the function discovery sequence information, it will be possible to apply a number of other recommendation systems resulting in a much higher success rate. For example, the discovery variations of the algorithms as described by Murphy-Hill and colleagues, which produced the recommendations with the highest success rates in their automated evaluation~\cite{murphy2012improving}. In the discovery variations of the algorithms, instead of using function frequency based vectors, users' vectors consist of discovery patterns that reflect the order in which an user discovers functions in spreadsheets. The collaborative filtering version with discovery finds user vectors with similar discovery patterns and recommends functions the similar users have discovered but the user has not. In the most popular algorithm with discovery, the most discovered function in the community is recommended to an user who has not discovered that function yet.
+
+Although we used an automated method to evaluate our system, it cannot replace the recommendations being evaluated by real life spreadsheet users. This type of evaluation can prove how much useful the recommendations actually are. It is possible to conduct a study, where we generate recommendations based on spreadsheet users in the industry and have the actual owners of the spreadsheets evaluate their personalized function recommendations. Alternatively, we can also measure the effectiveness of our recommendations by observing if the users accept the recommendations by using the function being recommended.
 
 \bibliographystyle{unsrt}
 \bibliography{report.bib}
-
-\section*{Appendix}
-\textbf{Prior roadmap:} By April demo, feature extraction, both algorithms, cross validation framework.
-\textbf{Current roadmap:} Done: feature extraction, CF algorithms implementation, cross validation framework, cross validation results for item-based CF. Working on: baseline, cross validation results for user-based CF and baseline.
-\subsection*{Contributions}
-\begin{itemize}
-   \item Shaown: feature extraction, CF algorithm implementations, cross validation infrastructure.
-   \item Matthew: cross validation framework implementation, results logging, running cross validation for item-based CF and collect results.
-   \item Nisarg: baseline implementation, cross validation implementation for baseline, running cross validation for baseline and collect results.
-\end{itemize}
 
 \end{document}

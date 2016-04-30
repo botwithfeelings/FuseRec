@@ -10,3 +10,5 @@
 FuseRec/.idea/*
 FuseRec/Fuse_Data/fuse-bin
 *.ipynb
+.DS_Store
+~$*.xlsx
