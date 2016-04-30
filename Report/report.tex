@@ -203,16 +203,12 @@ Our cross validation success rate represents the overall cumulative success rate
 \label{fig:results}
 \end{figure}
 
+From the results, we can see that for 1 and 3 recommendations, item-based algorithm performs considerably better compared to the rest. The performance of the two user-based approach are identical for $m=1,3$, but they outperform the baseline only for $m=1$. For $m=10,20$, the baseline algorithm clearly outperforms the collaborative filtering based approaches, with the item-based algorithm stil performing better than both user-based approaches.
+
 \section{Discussion}
-From the results of the item-based collaborative filtering algorithm, we can conclude that the recommendations become more effective as we increase the number of recommendations retrieved $m$, but the effectiveness of the recommendations start to pleateau after the value of $m$ reaches 5.
-\begin{center}
-   \texttt{Under Construction}
-   \begin{itemize}
-      \item Discuss results for user-based cf.
-      \item Discuss comparative performance against baseline.
-      \item Address any threats to validity.
-   \end{itemize}
-\end{center}
+Our results show that the item-based collaborative filtering algorithm performs best for smaller number of recommended functions, but as the number of recommendations, $m$, increases, the increase in performance is small compared to the baseline most popular algorithm. The high success rate of the most popular algorithm for larger values of $m$ can be explained by the lack of function usage diversity witin the Fuse corpus, thus when recommending the top 10 or 20 functions from the most popular list, it's very likely that a large number of users will only be using these functions. This reinstates our original hypothesis that most spreadsheet users only use a limited number of functions.
+
+In our results, the user-based algorithm approach performed considerably worse compared to both baseline and the item-based algorithms across the board. The better performance of item-based over user-based can be explained based on the way these algorithm retrieves the recommendations. In item-based approache we look up the similarity score in the matrix, which is compiled over the entire training set, thus providing a refined similarity score value and a more correlating set of recommendations. Whereas in the user-based approach, we only look at the functions in the similar users, thus limiting the possible quality of the recommendations to the set of functions in the similar users.
 
 \section{Future Work}
 One of the salient limitations of the recommendation systems used in this work was that the function usage rate and diversity was quite low in the Fuse spreadsheet corpus, where only a very small percentage of the spreadsheets contained function usage. This however can be alleviated considerably by incorporating other existing spreadsheet corpus like Enron~\cite{hermans2014enron} and EUSES~\cite{fisher2005euses} into the extracted user function vectors used in our algorithms.
