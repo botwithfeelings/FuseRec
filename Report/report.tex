@@ -185,18 +185,6 @@ For evaluating the system based on the algorithms in the previous section, we us
 In our cross validation, we took a single user vector from the testing set as input vector. In this input vector, we removed a function at random and retrieved the recommendations for this modified input vector. If the set of recommendations contained the removed function, then we counted this as a successful recommendation. The success rate was represented as a percentage of each individual testing set. The overall 14-fold cross validation success rate was calculated as a cumulative percentage of these individual 14 success rates.
 
 \section{Results}
-
-\begin{tabular}{|c|c|c|c|c|}
-    \hline
-    NumRecs & Item & User 10 & User 20 & Baseline  \\
-    \hline
-    1 & 27.66\% & 17.76\%  & 18.50\% & 14.10\%\\
-    3 & 54.29\% & 34.50\% & 35.10\% & 52.22\%\\
-    5 & 62.45\% & 39.94\% & 51.00\% & 70.64\%\\
-    10 & 66.70\% & 46.28\% & 57.80\% & 87.30\%\\
-    \hline
-\end{tabular}
-
 In all our recommendation systems, we had one common tuning parameter - the number of functions recommended, $m$. Although a smaller value for $m$ is preferred for usability purposes, we ran our cross validation using four different values for $m$: 1, 3, 5, and 10. For the user-based collaborative filtering algorithm, we had another tuning parameter - the number of similar user vectors used to generate the recommendations. We chose two values for this tuning parameter: 10 and 20, as values below 10 would often not fill the required $m=10$ function recommendations. With these tuning parameters, we had the following four distinct cross validation run category, each with four different run for each distinct $m$ value:
 \begin{itemize}
    \item Most popular
@@ -205,7 +193,7 @@ In all our recommendation systems, we had one common tuning parameter - the numb
    \item User-based collaborating filtering with 20 similar user vectors.
 \end{itemize}
 
-Our cross validation success rate represents the overall cumulative success rate over the entire 14-slice user vector training sets. Figure~\ref{fig:results} shows the percentage success rates over the number of recommendations as a line graph.
+Our cross validation success rate represents the overall cumulative success rate over the entire 14-slice user vector training sets. Figure~\ref{fig:results} shows the percentage success rates over the number of recommendations as a line graph, and table~\ref{table:results} shows the exact success rate percentage values over the number of recommendations.
 
 \begin{figure}[h]
 \begin{center}
@@ -215,12 +203,28 @@ Our cross validation success rate represents the overall cumulative success rate
 \label{fig:results}
 \end{figure}
 
+\begin{table}[h]
+   \centering
+   \begin{tabular}{|c|c|c|c|c|}
+      \hline
+      NumRecs & Item & User 10 & User 20 & Baseline  \\
+      \hline
+      1 & 27.66\% & 17.76\%  & 18.50\% & 14.10\%\\
+      3 & 54.29\% & 34.50\% & 35.10\% & 52.22\%\\
+      5 & 62.45\% & 39.94\% & 51.00\% & 70.64\%\\
+      10 & 66.70\% & 46.28\% & 57.80\% & 87.30\%\\
+      \hline
+   \end{tabular}
+   \caption{Number of recommendations and success rate}
+   \label{table:results}
+\end{table}
+
 From the results, we can see that for 1 and 3 recommendations, item-based algorithm performs considerably better compared to the rest. The performance of the two user-based approach are identical for $m=1,3$, but they outperform the baseline only for $m=1$. For $m=10,20$, the baseline algorithm clearly outperforms the collaborative filtering based approaches, with the item-based algorithm stil performing better than both user-based approaches.
 
 \section{Discussion}
-Our results show that the item-based collaborative filtering algorithm performs best for smaller number of recommended functions, but as the number of recommendations, $m$, increases, the increase in performance is small compared to the baseline most popular algorithm. The high success rate of the most popular algorithm for larger values of $m$ can be explained by the lack of function usage diversity witin the Fuse corpus, thus when recommending the top 10 or 20 functions from the most popular list, it's very likely that a large number of users will only be using these functions. This reinstates our original hypothesis that most spreadsheet users only use a limited number of functions.
+Our results show that the item-based collaborative filtering algorithm performs best for smaller number of recommended functions, but as the number of recommendations, $m$, increases; the increase in performance is small compared to the baseline - most popular algorithm. The high success rate of the most popular algorithm for larger values of $m$ can be explained by the lack of function usage diversity witin the Fuse corpus, thus when recommending the top 10 or 20 functions from the most popular list, it is very likely that a large number of users will only be using these functions. This reinstates our original hypothesis that most spreadsheet users only use a limited number of functions.
 
-In our results, the user-based algorithm approach performed considerably worse compared to both baseline and the item-based algorithms across the board. The better performance of item-based over user-based can be explained based on the way these algorithm retrieves the recommendations. In item-based approache we look up the similarity score in the matrix, which is compiled over the entire training set, thus providing a refined similarity score value and a more correlating set of recommendations. Whereas in the user-based approach, we only look at the functions in the similar users, thus limiting the possible quality of the recommendations to the set of functions in the similar users.
+In our results, the user-based algorithm approach performed considerably worse compared to both baseline and the item-based algorithms across the board. The better performance of item-based over user-based can be explained based on the way these algorithms retrieve the recommendations. In item-based approache we look up the similarity score in the matrix, which is compiled over the entire training set, thus providing a refined similarity score value and a more correlating set of recommendations. Whereas in the user-based approach, we only look at the functions in the similar users, thus limiting the possible quality of the recommendations to the set of functions in the similar users.
 
 \section{Future Work}
 One of the salient limitations of the recommendation systems used in this work was that the function usage rate and diversity was quite low in the Fuse spreadsheet corpus, where only a very small percentage of the spreadsheets contained function usage. This however can be alleviated considerably by incorporating other existing spreadsheet corpus like Enron~\cite{hermans2014enron} and EUSES~\cite{fisher2005euses} into the extracted user function vectors used in our algorithms.
