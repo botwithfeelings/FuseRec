@@ -1,8 +1,9 @@
 from __future__ import division
 
 from math import sqrt, ceil
-from pickle import load
-from math import log
+from cPickle import load
+from numpy import log, errstate
+import warnings
 import config
 
 
@@ -16,11 +17,21 @@ def average(l):
 # Yields n chunks from list l.
 def get_chunks(l, n):
     size = int(ceil(len(l)/n))
-    retList = list()
+    ret_list = list()
     for i in xrange(0, len(l), size):
-        retList.append(l[i:i+size])
+        ret_list.append(l[i:i+size])
 
-    return retList
+    return ret_list
+
+
+# Returns the most popular list of functions from a set of training data.
+def generate_most_popular_list(d):
+    pop_list = dict()
+    for val in d.itervalues():
+        pop_list.update((func, pop_list.get(func, 0) + freq) for func, freq in val.iteritems())
+
+    return sorted(pop_list, key=pop_list.get, reverse=True)
+
 
 # Get training and testing data set from the given data,
 # where testing data contains the pairs in the chunk and
@@ -39,19 +50,24 @@ def get_data_split(data, chunk):
 
 
 # Natural log of total users / no. of users using function f in vector set v.
-def get_inverse_user_freq(f, v):
+def get_inverse_user_freq(f, v, cache=None):
+    # If a cache is passed then do a simple lookup.
+    if cache is not None:
+        return log(len(v) / cache.get(f))
+
+    # Otherwise do it in the costly way.
     return log(len(v)/sum([f in data.keys() for data in v.itervalues()]))
 
 
 # Get the function-freq inverse-user-freq weighted values for the passed in data.
-def get_weighted_vectors(d):
+def get_weighted_vectors(d, cache=None):
     for (user, data) in d.iteritems():
         # Iterate through and normalize the each user vector.
         user_sum = sum([v for v in data.itervalues()])
-        data.update((k, v/user_sum) for (k, v) in data.iteritems())
 
-        # Now get the weighted vector values using inverse user frequency.
-        data.update((k, config.tuning_param["alpha"] * v * get_inverse_user_freq(k, d))
+        data.update( (k, (0 if v == 0 else v/user_sum)) for (k, v) in data.iteritems())
+
+        data.update((k, config.tuning_param["alpha"] * v * get_inverse_user_freq(k, d, cache))
                     for (k, v) in data.iteritems())
 
         d[user] = data
