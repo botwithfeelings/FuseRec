@@ -1,23 +1,23 @@
 ----------------------------------------------------------------------------------------------------
 Algo:User Based	 Num_slices:14	 Num_recs: 10	 Num_users: 20	
-Slice:1	Success:198	Total:494	Rate:0.400810
-Slice:2	Success:294	Total:494	Rate:0.595142
-Slice:3	Success:320	Total:494	Rate:0.647773
-Slice:4	Success:307	Total:494	Rate:0.621457
-Slice:5	Success:295	Total:494	Rate:0.597166
-Slice:6	Success:294	Total:494	Rate:0.595142
-Slice:7	Success:316	Total:494	Rate:0.639676
-Slice:8	Success:308	Total:494	Rate:0.623482
-Slice:9	Success:305	Total:494	Rate:0.617409
-Slice:10	Success:314	Total:494	Rate:0.635628
-Slice:11	Success:284	Total:494	Rate:0.574899
-Slice:12	Success:299	Total:494	Rate:0.605263
-Slice:13	Success:295	Total:494	Rate:0.597166
-Slice:14	Success:299	Total:491	Rate:0.608961
+Slice:1	Success:200	Total:494	Rate:0.404858
+Slice:2	Success:292	Total:494	Rate:0.591093
+Slice:3	Success:310	Total:494	Rate:0.627530
+Slice:4	Success:298	Total:494	Rate:0.603239
+Slice:5	Success:285	Total:494	Rate:0.576923
+Slice:6	Success:310	Total:494	Rate:0.627530
+Slice:7	Success:312	Total:494	Rate:0.631579
+Slice:8	Success:285	Total:494	Rate:0.576923
+Slice:9	Success:280	Total:494	Rate:0.566802
+Slice:10	Success:286	Total:494	Rate:0.578947
+Slice:11	Success:269	Total:494	Rate:0.544534
+Slice:12	Success:273	Total:494	Rate:0.552632
+Slice:13	Success:283	Total:494	Rate:0.572874
+Slice:14	Success:310	Total:491	Rate:0.631365
 ----------------------------------------------------------------------------------------------------
 FINAL: 
 ALGO: User Based
-OVERALL_SUCCESS_RATE: 0.597136
+OVERALL_SUCCESS_RATE: 0.577607
 NUM_SLICES: 14
 NUM_RECS: 10
 NUM_USERS: 20
