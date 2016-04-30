@@ -3,7 +3,7 @@
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{graphicx}
-\graphicspath{ {images/} }
+\graphicspath{ {out/} }
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
 
 
@@ -51,7 +51,7 @@ Spreadsheet software comes with lots of functions built-in. Consider Microsoft E
 Functionality awareness is important to accomplish new tasks as well as achieving efficient completion of existing tasks. Systems to recommend commands have been used successfully to improve functionality awareness in large and complex software applications~\cite{matejka2009communitycommands,murphy2012improving}. Recommender systems are used generally to produce a list of predictions based on the preference of an user and the similarity of preferences of other users. In recent years, recommender systems have become quite popular and have been applied successfully in multiple sectors of business~\cite{linden2003amazon} and academia~\cite{hsu2008personalized,mcnee2006don}. 
 
 % Our contribution.
-Our contribution in this paper -- we recommended functions in spreadsheets by applying two distinct variations of the collaborative filtering algorithm and compare the effectiveness of the recommendations using a cross validation based automated evaluation. We also compared their performance for recommending functions against another algorithm previously used for recommending commands in large software systems, the Most Popular algorithm~\cite{linton2000owl}. And we conclude by discussing how the results of our work can be used to create an Microsoft Excel plugin that can assist users to increase functional awareness by recommending functions they can use.
+Our contribution in this paper -- we recommended functions in spreadsheets by applying two distinct variations of the collaborative filtering algorithm and compare the effectiveness of the recommendations using a cross validation based automated evaluation. We also compared their performance for recommending functions against another algorithm previously used for recommending commands in large software systems, the Most Popular algorithm~\cite{linton2000owl}. And we conclude by discussing how the results of our work can be improved by conflating our user vectors set with other existing spreadsheet corpora and a real-world user evaluation of our recommendations.
 
 %% \subsection{Double-blind reviewing}
 
@@ -180,29 +180,28 @@ Linton and colleagues introduced the Most Popular algorithm in their OWL~\cite{l
 The underlying assumption of this algorithm is that the functions most frequently used by the community are also the most useful functions. For this reason, this algorithm has an advantage over collaborative filtering - it can recommend functions to users whose function usage history is not known (the input vector consists of entirely zeros). However, this algorithm suffers from lack of personalization, as it does not take into consideration the usage frequencies of the functions in the input user vector.
 
 \section{Evaluation}
-For evaluating the system based on the algorithms in the previous section, we used the k-folds cross validation technique, which enabled us to evaluate our system using the existing feature vectors extracted from the Fuse corpus. We used a 14 fold cross validation, splitting the entire set of ~7,000 user vectors in 14 slices and treating a single slice as testing set and the rest as our training set.
+For evaluating the system based on the algorithms in the previous section, we used the k-folds cross validation technique, which enabled us to evaluate our system using the existing feature vectors extracted from the Fuse corpus. We used a 14 fold cross validation, splitting the entire set of almost 7,000 user vectors in 14 slices and treating a single slice as testing set and the rest as our training set.
 
-In our cross validation, we took a single user vector from the testing set as input vector. In this input vector, we removed a function at random and retrieved the recommendations for this modified input vector. If the set of recommendations contained the removed function, then we counted this as a successful recommendation. The success rate was represented as a percentage of each individual testing set. The overall 14-fold cross validation success rate was calculated as a mean of these individual 14 success rates.
+In our cross validation, we took a single user vector from the testing set as input vector. In this input vector, we removed a function at random and retrieved the recommendations for this modified input vector. If the set of recommendations contained the removed function, then we counted this as a successful recommendation. The success rate was represented as a percentage of each individual testing set. The overall 14-fold cross validation success rate was calculated as a cumulative percentage of these individual 14 success rates.
 
 \section{Results}
-For item-based approach, we had one tuning parameter - $m$, the number of functions recommended. We used four different values for $m$: 1, 3, 5, 10. The bar graph in figure \ref{fig:itemresults} shows the comparative overall success rate for the different values for the number of recommendations retrieved.
+In all our recommendation systems, we had one common tuning parameter - the number of functions recommended, $m$. Although a smaller value for $m$ is preferred for usability purposes, we ran our cross validation using four different values for $m$: 1, 3, 5, and 10. For the user-based collaborative filtering algorithm, we had another tuning parameter - the number of similar user vectors used to generate the recommendations. We chose two values for this tuning parameter: 10 and 20, as values below 10 would often not fill the required $m=10$ function recommendations. With these tuning parameters, we had the following four distinct cross validation run category, each with four different run for each distinct $m$ value:
+\begin{itemize}
+   \item Most popular
+   \item Item-based collaborative filtering
+   \item User-based collaborative filtering with 10 similar user vectors.
+   \item User-based collaborating filtering with 20 similar user vectors.
+\end{itemize}
+
+Our cross validation success rate represents the overall cumulative success rate over the entire 14-slice user vector training sets. Figure~\ref{fig:results} shows the percentage success rates over the number of recommendations as a line graph.
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[height=6cm,width=8cm]{Item}
+\includegraphics[height=6cm,width=8cm]{graph}
 \end{center}
-\caption{Item-based CF: number of recommendations vs success rate}
-\label{fig:itemresults}
+\caption{Number of recommendations vs success rate}
+\label{fig:results}
 \end{figure}
-
-\begin{center}
-   \texttt{Under Construction}
-   \begin{itemize}
-      \item Specify tuning parameters - number of similar users and number of recommendations retrieved for user-based CF along with bar chart graphics to display results.
-      \item Specify the tuning paramters - number of recommendations retrieved for baseline algorithm along with bar chart graphics to display results.
-      \item Comparative results graphics featuring cluster bar graphics to show overall results for all three algorithms.
-   \end{itemize}
-\end{center}
 
 \section{Discussion}
 From the results of the item-based collaborative filtering algorithm, we can conclude that the recommendations become more effective as we increase the number of recommendations retrieved $m$, but the effectiveness of the recommendations start to pleateau after the value of $m$ reaches 5.
