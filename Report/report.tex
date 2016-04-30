@@ -185,6 +185,18 @@ For evaluating the system based on the algorithms in the previous section, we us
 In our cross validation, we took a single user vector from the testing set as input vector. In this input vector, we removed a function at random and retrieved the recommendations for this modified input vector. If the set of recommendations contained the removed function, then we counted this as a successful recommendation. The success rate was represented as a percentage of each individual testing set. The overall 14-fold cross validation success rate was calculated as a cumulative percentage of these individual 14 success rates.
 
 \section{Results}
+
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    NumRecs & Item & User 10 & User 20 & Baseline  \\
+    \hline
+    1 & 27.66\% & 17.76\%  & 18.50\% & 14.10\%\\
+    3 & 54.29\% & 34.50\% & 35.10\% & 52.22\%\\
+    5 & 62.45\% & 39.94\% & 51.00\% & 70.64\%\\
+    10 & 66.70\% & 46.28\% & 57.80\% & 87.30\%\\
+    \hline
+\end{tabular}
+
 In all our recommendation systems, we had one common tuning parameter - the number of functions recommended, $m$. Although a smaller value for $m$ is preferred for usability purposes, we ran our cross validation using four different values for $m$: 1, 3, 5, and 10. For the user-based collaborative filtering algorithm, we had another tuning parameter - the number of similar user vectors used to generate the recommendations. We chose two values for this tuning parameter: 10 and 20, as values below 10 would often not fill the required $m=10$ function recommendations. With these tuning parameters, we had the following four distinct cross validation run category, each with four different run for each distinct $m$ value:
 \begin{itemize}
    \item Most popular
